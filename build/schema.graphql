@@ -1,0 +1,5 @@
+type Spaceport @entity {
+  id: ID!
+  createdAtTimestamp: BigInt!
+  createdAtBlockNumber: BigInt!
+}

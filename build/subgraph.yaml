@@ -1,0 +1,26 @@
+specVersion: 0.0.2
+description: Colect Spaceports contracts analytics
+repository: https://github.com/itsib/spaceport-subgraph
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: SpaceportFactory
+    network: kovan
+    source:
+      address: "0x814aea5660fa1a0b6e156b1aa0c955581fcb5f88"
+      abi: SpaceportFactory
+      startBlock: 24389611
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Spaceport
+      abis:
+        - name: SpaceportFactory
+          file: SpaceportFactory/abis/spaceport-factory.json
+      eventHandlers:
+        - event: spaceportRegistered(address)
+          handler: handleSpaceportRegistered
+      file: SpaceportFactory/SpaceportFactory.wasm
