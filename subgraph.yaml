@@ -1,5 +1,5 @@
 specVersion: 0.0.2
-description: Colect Spaceports contracts analytics
+description: Collect Spaceports contracts analytics
 repository: https://github.com/itsib/spaceport-subgraph
 schema:
   file: ./schema.graphql
@@ -18,8 +18,16 @@ dataSources:
       entities:
         - Spaceport
       abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
         - name: SpaceportFactory
           file: ./abis/spaceport-factory.json
+        - name: Spaceport
+          file: ./abis/spaceport.json
       eventHandlers:
         - event: spaceportRegistered(address)
           handler: handleSpaceportRegistered

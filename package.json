@@ -1,14 +1,13 @@
 {
-  "name": "xppay",
+  "name": "spaceport-subgraph",
   "version": "0.1.0",
   "scripts": {
-    "build-contract": "solc contracts/Gravity.sol --abi -o abis --overwrite && solc contracts/Gravity.sol --bin -o bin --overwrite",
-    "create": "graph create itsib/xppay --node https://api.thegraph.com/deploy/",
-    "create-local": "graph create itsib/xppay --node http://127.0.0.1:8020",
+    "create": "graph create itsib/spaceport-subgraph-kovan --node https://api.thegraph.com/deploy/",
+    "create-local": "graph create itsib/spaceport-subgraph-kovan --node http://127.0.0.1:8020",
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
-    "deploy": "graph deploy itsib/xppay --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-    "deploy-local": "graph deploy itsib/xppay --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
+    "deploy": "graph deploy itsib/spaceport-subgraph-kovan --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy-local": "graph deploy itsib/spaceport-subgraph-kovan --ipfs http://localhost:5001 --node http://127.0.0.1:8020"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.20.0",

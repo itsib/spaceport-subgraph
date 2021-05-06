@@ -42,6 +42,33 @@ export class Spaceport extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get owner(): string {
+    let value = this.get("owner");
+    return value.toString();
+  }
+
+  set owner(value: string) {
+    this.set("owner", Value.fromString(value));
+  }
+
+  get spaceToken(): string {
+    let value = this.get("spaceToken");
+    return value.toString();
+  }
+
+  set spaceToken(value: string) {
+    this.set("spaceToken", Value.fromString(value));
+  }
+
+  get baceToken(): string {
+    let value = this.get("baceToken");
+    return value.toString();
+  }
+
+  set baceToken(value: string) {
+    this.set("baceToken", Value.fromString(value));
+  }
+
   get createdAtTimestamp(): BigInt {
     let value = this.get("createdAtTimestamp");
     return value.toBigInt();
@@ -58,5 +85,72 @@ export class Spaceport extends Entity {
 
   set createdAtBlockNumber(value: BigInt) {
     this.set("createdAtBlockNumber", Value.fromBigInt(value));
+  }
+}
+
+export class Token extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Token entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Token entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Token", id.toString(), this);
+  }
+
+  static load(id: string): Token | null {
+    return store.get("Token", id) as Token | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get symbol(): string {
+    let value = this.get("symbol");
+    return value.toString();
+  }
+
+  set symbol(value: string) {
+    this.set("symbol", Value.fromString(value));
+  }
+
+  get name(): string {
+    let value = this.get("name");
+    return value.toString();
+  }
+
+  set name(value: string) {
+    this.set("name", Value.fromString(value));
+  }
+
+  get decimals(): BigInt {
+    let value = this.get("decimals");
+    return value.toBigInt();
+  }
+
+  set decimals(value: BigInt) {
+    this.set("decimals", Value.fromBigInt(value));
+  }
+
+  get totalSupply(): BigInt {
+    let value = this.get("totalSupply");
+    return value.toBigInt();
+  }
+
+  set totalSupply(value: BigInt) {
+    this.set("totalSupply", Value.fromBigInt(value));
   }
 }

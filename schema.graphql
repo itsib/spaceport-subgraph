@@ -1,5 +1,16 @@
 type Spaceport @entity {
   id: ID!
+  owner: String!
+  spaceToken: Token!
+  baceToken: Token!
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
+}
+
+type Token @entity {
+  id: ID!
+  symbol: String!
+  name: String!
+  decimals: BigInt!
+  totalSupply: BigInt!
 }
