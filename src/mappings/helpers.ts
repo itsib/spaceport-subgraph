@@ -1,9 +1,17 @@
-import { Address, BigInt, log } from '@graphprotocol/graph-ts';
-import { Token } from '../types/schema';
+import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
+import { Spaceport, SpaceportStat, Token } from '../types/schema';
 import { ERC20 } from '../types/SpaceportFactory/ERC20';
 import { ERC20NameBytes } from '../types/SpaceportFactory/ERC20NameBytes';
 import { ERC20SymbolBytes } from '../types/SpaceportFactory/ERC20SymbolBytes';
-import { LOG_ID } from './constants';
+import {
+  LOG_ID,
+  ONE_BI,
+  ONE_DAY_IN_SECONDS,
+  ONE_HOUR_IN_SECONDS, ONE_MONTH_IN_SECONDS,
+  ONE_WEEK_IN_SECONDS,
+  PERIOD,
+  ZERO_BI,
+} from './constants';
 
 export function isNullEthValue(value: string): boolean {
   return value == '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -112,6 +120,93 @@ export function getOrCreateToken(tokenAddress: Address): Token {
     token.save();
   }
   return token as Token;
+}
+
+export function exponentToBigDecimal(decimals: BigInt): BigDecimal {
+  let bd = BigDecimal.fromString('1')
+  for (let i = ZERO_BI; i.lt(decimals as BigInt); i = i.plus(ONE_BI)) {
+    bd = bd.times(BigDecimal.fromString('10'))
+  }
+  return bd
+}
+
+export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: BigInt): BigDecimal {
+  if (exchangeDecimals == ZERO_BI) {
+    return tokenAmount.toBigDecimal()
+  }
+  return tokenAmount.toBigDecimal().div(exponentToBigDecimal(exchangeDecimals))
+}
+
+/**
+ * Build data timeframes (for hour, day, week, month)
+ * @param blockTimestamp
+ * @param spaceport
+ */
+export function createTimeFrames(blockTimestamp: BigInt, spaceport: Spaceport): void {
+  let periods = new Array<PERIOD>(4);
+  periods[0] = PERIOD.ONE_HOUR;
+  periods[1] = PERIOD.ONE_DAY;
+  periods[2] = PERIOD.ONE_WEEK;
+  periods[3] = PERIOD.ONE_MONTH;
+
+  for (let i = 0; i < periods.length; i++) {
+    let period = periods[i];
+    let periodInSeconds = periodToSeconds(period);
+    let periodIndex = blockTimestamp.div(periodInSeconds); // Get unique hour within unix history
+    let periodStart = periodIndex.times(periodInSeconds); // Want the rounded effect
+    let timeFrameID = periodIndex.toString() + "-" + spaceport.id;
+
+    let timeFrame = SpaceportStat.load(timeFrameID);
+    if (timeFrame === null) {
+      timeFrame = new SpaceportStat(timeFrameID);
+      timeFrame.spaceport = spaceport.id;
+      timeFrame.period = getPeriodName(period);
+      timeFrame.periodStart = periodStart;
+    }
+
+    timeFrame.participantsCount = spaceport.participantsCount;
+    timeFrame.depositTotal = spaceport.depositTotal;
+
+    timeFrame.save();
+  }
+}
+
+/**
+ * Converting period name to period in seconds (PERIOD.ONE_HOUR => 3600)
+ * @param period
+ */
+export function periodToSeconds(period: PERIOD): BigInt {
+  switch (period) {
+    case PERIOD.ONE_HOUR:
+      return ONE_HOUR_IN_SECONDS;
+    case PERIOD.ONE_DAY:
+      return ONE_DAY_IN_SECONDS;
+    case PERIOD.ONE_WEEK:
+      return ONE_WEEK_IN_SECONDS;
+    case PERIOD.ONE_MONTH:
+      return ONE_MONTH_IN_SECONDS;
+    default:
+      return ONE_HOUR_IN_SECONDS;
+  }
+}
+
+/**
+ * Returns period name for stored in BD
+ * @param period
+ */
+export function getPeriodName(period: PERIOD): string {
+  switch (period) {
+    case PERIOD.ONE_HOUR:
+      return 'ONE_HOUR';
+    case PERIOD.ONE_DAY:
+      return 'ONE_DAY';
+    case PERIOD.ONE_WEEK:
+      return 'ONE_WEEK';
+    case PERIOD.ONE_MONTH:
+      return 'ONE_MONTH';
+    default:
+      return 'ONE_HOUR';
+  }
 }
 
 /**

@@ -17,6 +17,7 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - Spaceport
+        - Participant
       abis:
         - name: ERC20
           file: ./abis/ERC20.json
@@ -31,4 +32,40 @@ dataSources:
       eventHandlers:
         - event: spaceportRegistered(address)
           handler: handleSpaceportRegistered
-      file: ./src/mapping/mapping.ts
+      file: ./src/mappings/factory.ts
+templates:
+  - kind: ethereum/contract
+    name: Spaceport
+    network: kovan
+    source:
+      abi: Spaceport
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings/mapping.ts
+      entities:
+        - Spaceport
+        - Participant
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: SpaceportFactory
+          file: ./abis/spaceport-factory.json
+        - name: Spaceport
+          file: ./abis/spaceport.json
+      eventHandlers:
+        - event: spaceportAddLiquidity()
+          handler: handleSpaceportAddLiquidity
+        - event: spaceportOwnerWithdrawTokens()
+          handler: handleSpaceportOwnerWithdrawTokens
+        - event: spaceportUserDeposit(uint256)
+          handler: handleSpaceportUserDeposit
+        - event: spaceportUserWithdrawBaseTokens(uint256)
+          handler: handleSpaceportUserWithdrawBaseTokens
+        - event: spaceportUserWithdrawTokens(uint256)
+          handler: handleSpaceportUserWithdrawTokens

@@ -1,10 +1,37 @@
+type SpaceportFactory @entity {
+  id: ID!
+  "Should be equal SpaceportFactory.spaceportsLength"
+  spaceportsLength: BigInt!
+}
+
 type Spaceport @entity {
   id: ID!
+  "Should be equal SpaceportFactory.spaceportsAtIndex"
+  index: BigInt!
   owner: String!
   spaceToken: Token!
-  baceToken: Token!
+  baseToken: Token!
+  inEth: Boolean!
+  participants: [Participant!]! @derivedFrom(field: "spaceport")
+  "Count of participants with a positive deposit"
+  participantsCount: BigInt!
+  depositTotal: BigDecimal!
+  stats: [SpaceportStat!]! @derivedFrom(field: "spaceport")
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
+}
+
+type User @entity {
+  id: ID!
+  spaceports: [Participant!] @derivedFrom(field: "participant")
+  transactions: [Transaction!]! @derivedFrom(field: "user")
+}
+
+type Participant @entity {
+  id: ID!
+  participant: User!
+  spaceport: Spaceport!
+  deposit: BigDecimal!
 }
 
 type Token @entity {
@@ -13,4 +40,29 @@ type Token @entity {
   name: String!
   decimals: BigInt!
   totalSupply: BigInt!
+}
+
+type Transaction @entity {
+  id: ID!
+  from: String
+  to: String
+  value: BigDecimal
+  user: User!
+}
+
+enum TimeFramePeriod {
+  ONE_HOUR
+  ONE_DAY
+  ONE_WEEK
+  ONE_MONTH
+}
+
+type SpaceportStat @entity {
+  id: ID!
+  spaceport: Spaceport!
+  period: TimeFramePeriod!
+  periodStart: BigInt!
+
+  participantsCount: BigInt!
+  depositTotal: BigDecimal!
 }

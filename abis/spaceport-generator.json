@@ -1,6 +1,17 @@
 [
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "factory",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "settings",
+        "type": "address"
+      }
+    ],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
@@ -70,6 +81,11 @@
         "internalType": "uint256[10]",
         "name": "uint_params",
         "type": "uint256[10]"
+      },
+      {
+        "internalType": "uint256[2]",
+        "name": "vesting_params",
+        "type": "uint256[2]"
       }
     ],
     "name": "createSpaceport",

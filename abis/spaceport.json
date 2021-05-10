@@ -11,6 +11,57 @@
     "type": "constructor"
   },
   {
+    "anonymous": false,
+    "inputs": [],
+    "name": "spaceportAddLiquidity",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "spaceportOwnerWithdrawTokens",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "spaceportUserDeposit",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "spaceportUserWithdrawBaseTokens",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      }
+    ],
+    "name": "spaceportUserWithdrawTokens",
+    "type": "event"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -32,8 +83,23 @@
       },
       {
         "internalType": "uint256",
-        "name": "tokensLockTime",
+        "name": "lastUpdate",
         "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "vestingTokens",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "vestingTokensOwed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "vestingRunning",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -205,6 +271,24 @@
         "internalType": "contract ISpaceportSettings",
         "name": "",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SPACEPORT_VESTING",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "vestingCliff",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "vestingEnd",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -465,6 +549,16 @@
         "internalType": "address payable",
         "name": "_tokenFeeAddress",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_vestingCliff",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_vestingEnd",
+        "type": "uint256"
       }
     ],
     "name": "init2",
