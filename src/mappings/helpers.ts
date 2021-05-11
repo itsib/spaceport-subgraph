@@ -4,6 +4,7 @@ import { ERC20 } from '../types/SpaceportFactory/ERC20';
 import { ERC20NameBytes } from '../types/SpaceportFactory/ERC20NameBytes';
 import { ERC20SymbolBytes } from '../types/SpaceportFactory/ERC20SymbolBytes';
 import {
+  BI_18,
   LOG_ID,
   ONE_BI,
   ONE_DAY_IN_SECONDS,
@@ -115,7 +116,7 @@ export function getOrCreateToken(tokenAddress: Address): Token {
     if (decimals !== null) {
       token.decimals = decimals
     } else {
-      token.decimals = BigInt.fromString('18')
+      token.decimals = BI_18
     }
     token.save();
   }

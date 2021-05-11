@@ -4,7 +4,7 @@ import { Spaceport as SpaceportContract } from '../types/SpaceportFactory/Spacep
 import { Spaceport as SpaceportTemplate } from '../types/templates'
 import { spaceportRegistered } from '../types/SpaceportFactory/SpaceportFactory';
 import { ONE_BI, ZERO_BD, ZERO_BI } from './constants';
-import { createTimeFrames, getOrCreateToken } from './helpers';
+import { convertTokenToDecimal, createTimeFrames, getOrCreateToken } from './helpers';
 
 export function handleSpaceportRegistered(event: spaceportRegistered): void {
   let spaceportFactoryId = event.address.toHexString()
@@ -28,13 +28,20 @@ export function handleSpaceportRegistered(event: spaceportRegistered): void {
     let spaceToken = getOrCreateToken(spaceTokenAddress);
     let baseToken = getOrCreateToken(baseTokenAddress);
 
-    spaceport.index = spaceportFactory.spaceportsLength;
+    spaceport.spaceportIndex = spaceportFactory.spaceportsLength;
     spaceport.spaceToken = spaceToken.id;
     spaceport.baseToken = baseToken.id;
     spaceport.inEth = spaceportInfo.value13;
+    spaceport.forceFailed = false;
+    spaceport.lpGenerationComplete = false;
     spaceport.participantsCount = ZERO_BI;
     spaceport.depositTotal = ZERO_BD;
+    spaceport.hardcap = convertTokenToDecimal(spaceportInfo.value6, baseToken.decimals);
+    spaceport.softcap = convertTokenToDecimal(spaceportInfo.value7, baseToken.decimals);
     spaceport.owner = spaceportInfo.value0.toHex();
+
+    spaceport.startBlock = spaceportInfo.value10;
+    spaceport.endBlock = spaceportInfo.value11;
     spaceport.createdAtTimestamp = event.block.timestamp;
     spaceport.createdAtBlockNumber = event.block.number;
 

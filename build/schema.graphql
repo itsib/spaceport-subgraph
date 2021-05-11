@@ -7,16 +7,26 @@ type SpaceportFactory @entity {
 type Spaceport @entity {
   id: ID!
   "Should be equal SpaceportFactory.spaceportsAtIndex"
-  index: BigInt!
+  spaceportIndex: BigInt!
   owner: String!
   spaceToken: Token!
   baseToken: Token!
   inEth: Boolean!
+  forceFailed: Boolean!
+  lpGenerationComplete: Boolean!
+
   participants: [Participant!]! @derivedFrom(field: "spaceport")
   "Count of participants with a positive deposit"
   participantsCount: BigInt!
+
   depositTotal: BigDecimal!
+  hardcap: BigDecimal!
+  softcap: BigDecimal!
+
   stats: [SpaceportStat!]! @derivedFrom(field: "spaceport")
+
+  startBlock: BigInt!
+  endBlock: BigInt!
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
 }

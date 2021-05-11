@@ -82,13 +82,13 @@ export class Spaceport extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get index(): BigInt {
-    let value = this.get("index");
+  get spaceportIndex(): BigInt {
+    let value = this.get("spaceportIndex");
     return value.toBigInt();
   }
 
-  set index(value: BigInt) {
-    this.set("index", Value.fromBigInt(value));
+  set spaceportIndex(value: BigInt) {
+    this.set("spaceportIndex", Value.fromBigInt(value));
   }
 
   get owner(): string {
@@ -127,6 +127,24 @@ export class Spaceport extends Entity {
     this.set("inEth", Value.fromBoolean(value));
   }
 
+  get forceFailed(): boolean {
+    let value = this.get("forceFailed");
+    return value.toBoolean();
+  }
+
+  set forceFailed(value: boolean) {
+    this.set("forceFailed", Value.fromBoolean(value));
+  }
+
+  get lpGenerationComplete(): boolean {
+    let value = this.get("lpGenerationComplete");
+    return value.toBoolean();
+  }
+
+  set lpGenerationComplete(value: boolean) {
+    this.set("lpGenerationComplete", Value.fromBoolean(value));
+  }
+
   get participants(): Array<string> {
     let value = this.get("participants");
     return value.toStringArray();
@@ -154,6 +172,24 @@ export class Spaceport extends Entity {
     this.set("depositTotal", Value.fromBigDecimal(value));
   }
 
+  get hardcap(): BigDecimal {
+    let value = this.get("hardcap");
+    return value.toBigDecimal();
+  }
+
+  set hardcap(value: BigDecimal) {
+    this.set("hardcap", Value.fromBigDecimal(value));
+  }
+
+  get softcap(): BigDecimal {
+    let value = this.get("softcap");
+    return value.toBigDecimal();
+  }
+
+  set softcap(value: BigDecimal) {
+    this.set("softcap", Value.fromBigDecimal(value));
+  }
+
   get stats(): Array<string> {
     let value = this.get("stats");
     return value.toStringArray();
@@ -161,6 +197,24 @@ export class Spaceport extends Entity {
 
   set stats(value: Array<string>) {
     this.set("stats", Value.fromStringArray(value));
+  }
+
+  get startBlock(): BigInt {
+    let value = this.get("startBlock");
+    return value.toBigInt();
+  }
+
+  set startBlock(value: BigInt) {
+    this.set("startBlock", Value.fromBigInt(value));
+  }
+
+  get endBlock(): BigInt {
+    let value = this.get("endBlock");
+    return value.toBigInt();
+  }
+
+  set endBlock(value: BigInt) {
+    this.set("endBlock", Value.fromBigInt(value));
   }
 
   get createdAtTimestamp(): BigInt {
