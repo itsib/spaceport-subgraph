@@ -35,7 +35,6 @@ type Spaceport @entity {
 type User @entity {
   id: ID!
   spaceports: [Participant!] @derivedFrom(field: "participant")
-  transactions: [Transaction!]! @derivedFrom(field: "user")
 }
 
 type Participant @entity {
@@ -50,15 +49,6 @@ type Token @entity {
   symbol: String!
   name: String!
   decimals: BigInt!
-  totalSupply: BigInt!
-}
-
-type Transaction @entity {
-  id: ID!
-  from: String
-  to: String
-  value: BigDecimal
-  user: User!
 }
 
 enum TimeFramePeriod {
@@ -78,8 +68,12 @@ type SpaceportStat @entity {
   depositTotal: BigDecimal!
 }
 
-type UpdateQueue @entity {
-  "Block number when to update spaceports from the array"
+type LatestUpdatedBlock @entity {
   id: ID!
-  spaceports: [Spaceport!]!
+  blockNumber: BigInt!
+}
+
+type UpdateTask @entity {
+  id: ID!
+  spaceports: [String!]!
 }

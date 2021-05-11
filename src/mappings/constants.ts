@@ -2,6 +2,9 @@ import { BigDecimal, BigInt } from '@graphprotocol/graph-ts';
 
 export const LOG_ID = 'LOG765026354';
 
+export const EVENT_EMITTER_ADDRESS_MAIN = '0xc00e94cb662c3520282e6f5717214004a7f26888';  // In Mainnet
+export const EVENT_EMITTER_ADDRESS_KOVAN = '0x4d6bb4ed029b33cf25d0810b029bd8b1a6bcab7b';  // In Kovan
+
 export let ZERO_BI = BigInt.fromI32(0);
 export let ONE_BI = BigInt.fromI32(1);
 export let ZERO_BD = BigDecimal.fromString('0');

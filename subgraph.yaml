@@ -1,4 +1,4 @@
-specVersion: 0.0.2
+specVersion: 0.0.3
 description: Collect Spaceports contracts analytics
 repository: https://github.com/itsib/spaceport-subgraph
 schema:
@@ -17,8 +17,9 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/factory.ts
       entities:
+        - SpaceportFactory
         - Spaceport
-        - Participant
+        - Token
       abis:
         - name: ERC20
           file: ./abis/ERC20.json
@@ -33,8 +34,34 @@ dataSources:
       eventHandlers:
         - event: spaceportRegistered(address)
           handler: handleSpaceportRegistered
-      blockHandlers:
-        - handler: handleBlock
+  - kind: ethereum/contract
+    name: Updater
+    network: kovan
+    source:
+      address: '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
+      abi: Updater
+      startBlock: 24389611
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappings/update.ts
+      entities:
+        - Spaceport
+        - LatestUpdatedBlock
+        - UpdateTask
+      abis:
+        - name: Spaceport
+          file: ./abis/spaceport.json
+        - name: Updater
+          file: ./abis/updater.json
+      eventHandlers:
+        - event: Withdrawal(indexed address,uint256)
+          handler: handleWithdrawal
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+#        - event: Deposit(indexed address,uint256)
+#          handler: handleDeposit
 templates:
   - kind: ethereum/contract
     name: Spaceport
@@ -43,12 +70,16 @@ templates:
       abi: Spaceport
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.3
+      apiVersion: 0.0.4
       language: wasm/assemblyscript
       file: ./src/mappings/mapping.ts
       entities:
         - Spaceport
         - Participant
+        - User
+        - Participant
+        - Token
+        - SpaceportStat
       abis:
         - name: ERC20
           file: ./abis/ERC20.json

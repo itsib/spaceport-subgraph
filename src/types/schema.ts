@@ -255,15 +255,6 @@ export class User extends Entity {
       this.set("spaceports", Value.fromStringArray(value as Array<string>));
     }
   }
-
-  get transactions(): Array<string> {
-    let value = this.get("transactions");
-    return value.toStringArray();
-  }
-
-  set transactions(value: Array<string>) {
-    this.set("transactions", Value.fromStringArray(value));
-  }
 }
 
 export class Participant extends Entity {
@@ -380,106 +371,6 @@ export class Token extends Entity {
   set decimals(value: BigInt) {
     this.set("decimals", Value.fromBigInt(value));
   }
-
-  get totalSupply(): BigInt {
-    let value = this.get("totalSupply");
-    return value.toBigInt();
-  }
-
-  set totalSupply(value: BigInt) {
-    this.set("totalSupply", Value.fromBigInt(value));
-  }
-}
-
-export class Transaction extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save Transaction entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save Transaction entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("Transaction", id.toString(), this);
-  }
-
-  static load(id: string): Transaction | null {
-    return store.get("Transaction", id) as Transaction | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get from(): string | null {
-    let value = this.get("from");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set from(value: string | null) {
-    if (value === null) {
-      this.unset("from");
-    } else {
-      this.set("from", Value.fromString(value as string));
-    }
-  }
-
-  get to(): string | null {
-    let value = this.get("to");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toString();
-    }
-  }
-
-  set to(value: string | null) {
-    if (value === null) {
-      this.unset("to");
-    } else {
-      this.set("to", Value.fromString(value as string));
-    }
-  }
-
-  get value(): BigDecimal | null {
-    let value = this.get("value");
-    if (value === null || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigDecimal();
-    }
-  }
-
-  set value(value: BigDecimal | null) {
-    if (value === null) {
-      this.unset("value");
-    } else {
-      this.set("value", Value.fromBigDecimal(value as BigDecimal));
-    }
-  }
-
-  get user(): string {
-    let value = this.get("user");
-    return value.toString();
-  }
-
-  set user(value: string) {
-    this.set("user", Value.fromString(value));
-  }
 }
 
 export class SpaceportStat extends Entity {
@@ -558,7 +449,7 @@ export class SpaceportStat extends Entity {
   }
 }
 
-export class UpdateQueue extends Entity {
+export class LatestUpdatedBlock extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -566,17 +457,57 @@ export class UpdateQueue extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save UpdateQueue entity without an ID");
+    assert(id !== null, "Cannot save LatestUpdatedBlock entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save UpdateQueue entity with non-string ID. " +
+      "Cannot save LatestUpdatedBlock entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("UpdateQueue", id.toString(), this);
+    store.set("LatestUpdatedBlock", id.toString(), this);
   }
 
-  static load(id: string): UpdateQueue | null {
-    return store.get("UpdateQueue", id) as UpdateQueue | null;
+  static load(id: string): LatestUpdatedBlock | null {
+    return store.get("LatestUpdatedBlock", id) as LatestUpdatedBlock | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+}
+
+export class UpdateTask extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save UpdateTask entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save UpdateTask entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("UpdateTask", id.toString(), this);
+  }
+
+  static load(id: string): UpdateTask | null {
+    return store.get("UpdateTask", id) as UpdateTask | null;
   }
 
   get id(): string {

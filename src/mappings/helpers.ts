@@ -1,5 +1,5 @@
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
-import { Spaceport, SpaceportStat, Token, UpdateQueue } from '../types/schema';
+import { Spaceport, SpaceportStat, Token, UpdateTask } from '../types/schema';
 import { ERC20 } from '../types/SpaceportFactory/ERC20';
 import { ERC20NameBytes } from '../types/SpaceportFactory/ERC20NameBytes';
 import { ERC20SymbolBytes } from '../types/SpaceportFactory/ERC20SymbolBytes';
@@ -9,9 +9,13 @@ import {
   LOG_ID,
   ONE_BI,
   ONE_DAY_IN_SECONDS,
-  ONE_HOUR_IN_SECONDS, ONE_MONTH_IN_SECONDS,
+  ONE_HOUR_IN_SECONDS,
+  ONE_MONTH_IN_SECONDS,
   ONE_WEEK_IN_SECONDS,
-  PERIOD, STATUS_ACTIVE, STATUS_QUEUED, STATUS_SUCCESS,
+  PERIOD,
+  STATUS_ACTIVE,
+  STATUS_QUEUED,
+  STATUS_SUCCESS,
   ZERO_BI,
 } from './constants';
 
@@ -40,6 +44,8 @@ export function fetchTokenSymbol(tokenAddress: Address): string {
       // for broken pairs that have no symbol function exposed
       if (!isNullEthValue(symbolResultBytes.value.toHexString())) {
         symbolValue = symbolResultBytes.value.toString()
+      } else {
+        warning('Cannot find symbol for token {}', [tokenAddress.toHexString()]);
       }
     }
   } else {
@@ -70,6 +76,8 @@ export function fetchTokenName(tokenAddress: Address): string {
       // for broken exchanges that have no name function exposed
       if (!isNullEthValue(nameResultBytes.value.toHexString())) {
         nameValue = nameResultBytes.value.toString()
+      } else {
+        warning('Cannot find token name {}', [tokenAddress.toHexString()]);
       }
     }
   } else {
@@ -79,18 +87,7 @@ export function fetchTokenName(tokenAddress: Address): string {
   return nameValue
 }
 
-export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
-  let contract = ERC20.bind(tokenAddress)
-  let totalSupplyValue = null
-  let totalSupplyResult = contract.try_totalSupply()
-  if (!totalSupplyResult.reverted) {
-    totalSupplyValue = totalSupplyResult as i32
-  }
-  return BigInt.fromI32(totalSupplyValue as i32)
-}
-
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
-  // hardcode overrides
   if (tokenAddress.toHexString() == '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9') {
     return BigInt.fromI32(18)
   }
@@ -100,9 +97,12 @@ export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   let decimalValue = null
   let decimalResult = contract.try_decimals()
   if (!decimalResult.reverted) {
-    decimalValue = decimalResult.value
+    decimalValue = decimalResult.value;
+    return BigInt.fromI32(decimalValue as i32)
+  } else {
+    warning('Cannot find token decimals {}', [tokenAddress.toHexString()]);
+    return BI_18;
   }
-  return BigInt.fromI32(decimalValue as i32)
 }
 
 export function getOrCreateToken(tokenAddress: Address): Token {
@@ -112,7 +112,6 @@ export function getOrCreateToken(tokenAddress: Address): Token {
     token = new Token(tokenAddress.toHexString())
     token.symbol = fetchTokenSymbol(tokenAddress)
     token.name = fetchTokenName(tokenAddress)
-    token.totalSupply = fetchTokenTotalSupply(tokenAddress)
     let decimals = fetchTokenDecimals(tokenAddress)
     if (decimals !== null) {
       token.decimals = decimals
@@ -224,27 +223,6 @@ export function getStatus(statusId: BigInt): string {
 }
 
 /**
- * Add spaceport to the update queue
- * @param spaceportId
- * @param blockNumber
- */
-export function addToUpdateQueue(spaceportId: string, blockNumber: BigInt): void {
-  let updateQueueId = blockNumber.plus(ONE_BI).toString();
-  let updateQueue = UpdateQueue.load(updateQueueId);
-  if (updateQueue === null) {
-    updateQueue = new UpdateQueue(updateQueueId);
-    updateQueue.spaceports = [];
-  }
-  let spaceports = updateQueue.spaceports;
-  spaceports.push(spaceportId);
-  updateQueue.spaceports = spaceports;
-
-  updateQueue.save();
-
-  logger('The space port has been added to the update queue {}', [updateQueueId]);
-}
-
-/**
  * To call spaceport contract and get new status
  * @param spaceportId
  */
@@ -254,13 +232,46 @@ export function updateSpaceportStatus(spaceportId: string): void {
     return;
   }
   let spaceportContract = SpaceportContract.bind(Address.fromString(spaceportId));
-  let statusId = spaceportContract.spaceportStatus();
+  let result = spaceportContract.try_spaceportStatus();
+  if (result.reverted) {
+    warning('Couldn\'t update spaceport status {}', [spaceportId]);
+    return;
+  }
 
   let oldStatus = spaceport.status;
-  spaceport.status = getStatus(statusId);
+  spaceport.status = getStatus(result.value);
   spaceport.save();
 
   logger('The spaceport status has been changed {} => {}', [oldStatus, spaceport.status]);
+}
+
+/**
+ * Add spaceport to the update queue
+ * @param spaceportId
+ * @param blockNumber
+ */
+export function addToUpdateQueue(spaceportId: string, blockNumber: BigInt): void {
+  let updateQueueId = blockNumber.plus(ONE_BI).toString();
+  let updateQueue = UpdateTask.load(updateQueueId);
+  if (updateQueue === null) {
+    updateQueue = new UpdateTask(updateQueueId);
+    updateQueue.spaceports = [];
+  }
+
+  // Check if an address has been added to this queue
+  let spaceportIds = updateQueue.spaceports;
+  let index = spaceportIds.indexOf(spaceportId);
+  if (index == -1) {
+    let spaceports = updateQueue.spaceports;
+    spaceports.push(spaceportId);
+    updateQueue.spaceports = spaceports;
+
+    updateQueue.save();
+
+    logger('The space port has been added to the update queue {}', [updateQueueId]);
+  } else {
+    warning('The space port id already added to queue {}', [spaceportId])
+  }
 }
 
 /**
@@ -270,5 +281,15 @@ export function updateSpaceportStatus(spaceportId: string): void {
  */
 export function logger(msg: string, args: Array<string>): void {
   args.unshift(LOG_ID)
-  log.debug('{}: ' + msg, args);
+  log.info('{}: ' + msg, args);
+}
+
+/**
+ * Write log message in graph console with the log ID
+ * @param msg
+ * @param args
+ */
+export function warning(msg: string, args: Array<string>): void {
+  args.unshift(LOG_ID)
+  log.warning('{}: ' + msg, args);
 }

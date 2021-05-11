@@ -1,16 +1,10 @@
-import { Address, ethereum, store, dataSource } from '@graphprotocol/graph-ts';
-import { SpaceportFactory, Spaceport, UpdateQueue } from '../types/schema';
+import { Address } from '@graphprotocol/graph-ts';
+import { Spaceport, SpaceportFactory } from '../types/schema';
 import { Spaceport as SpaceportContract } from '../types/SpaceportFactory/Spaceport'
-import { Spaceport as SpaceportTemplate } from '../types/templates'
 import { spaceportRegistered } from '../types/SpaceportFactory/SpaceportFactory';
+import { Spaceport as SpaceportTemplate } from '../types/templates'
 import { ONE_BI, ZERO_BD, ZERO_BI } from './constants';
-import {
-  addToUpdateQueue,
-  createTimeFrames,
-  getOrCreateToken,
-  getStatus,
-  logger, updateSpaceportStatus,
-} from './helpers';
+import { addToUpdateQueue, createTimeFrames, getOrCreateToken, getStatus } from './helpers';
 
 export function handleSpaceportRegistered(event: spaceportRegistered): void {
   let spaceportFactoryId = event.address.toHexString()
@@ -50,36 +44,22 @@ export function handleSpaceportRegistered(event: spaceportRegistered): void {
 
     spaceport.save();
 
+    // Add startBlock to update spaceport queue
+    if (event.block.number.lt(spaceport.startBlock)) {
+      addToUpdateQueue(spaceportId, spaceport.startBlock);
+    }
+
+    // Add endBlock to update spaceport queue
+    if (event.block.number.lt(spaceport.endBlock)) {
+      addToUpdateQueue(spaceportId, spaceport.endBlock);
+    }
+
     spaceportFactory.spaceportsLength = spaceportFactory.spaceportsLength.plus(ONE_BI);
     spaceportFactory.save();
 
     createTimeFrames(event.block.timestamp, spaceport as Spaceport);
 
-    // Add startBlock to update spaceport queue
-    if (event.block.number.lt(spaceportInfo.value10)) {
-      addToUpdateQueue(spaceportId, spaceportInfo.value10);
-    }
-
-    // Add endBlock to update spaceport queue
-    if (event.block.number.lt(spaceportInfo.value11)) {
-      addToUpdateQueue(spaceportId, spaceportInfo.value11);
-    }
-
     // Create the tracked contract based on the template
     SpaceportTemplate.create(event.params.spaceportContract);
   }
-}
-
-export function handleBlock(block: ethereum.Block): void {
-  let updateQueue = UpdateQueue.load(block.number.toString());
-  if (updateQueue === null) {
-    return;
-  }
-
-  updateQueue.spaceports.forEach(spaceportId => {
-    updateSpaceportStatus(spaceportId);
-  });
-
-  logger('The queue item will be deleted {}', [block.number.toString()]);
-  store.remove('UpdateQueue', block.number.toString());
 }
