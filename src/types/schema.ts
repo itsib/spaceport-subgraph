@@ -127,22 +127,13 @@ export class Spaceport extends Entity {
     this.set("inEth", Value.fromBoolean(value));
   }
 
-  get forceFailed(): boolean {
-    let value = this.get("forceFailed");
-    return value.toBoolean();
+  get status(): string {
+    let value = this.get("status");
+    return value.toString();
   }
 
-  set forceFailed(value: boolean) {
-    this.set("forceFailed", Value.fromBoolean(value));
-  }
-
-  get lpGenerationComplete(): boolean {
-    let value = this.get("lpGenerationComplete");
-    return value.toBoolean();
-  }
-
-  set lpGenerationComplete(value: boolean) {
-    this.set("lpGenerationComplete", Value.fromBoolean(value));
+  set status(value: string) {
+    this.set("status", Value.fromString(value));
   }
 
   get participants(): Array<string> {
@@ -172,24 +163,6 @@ export class Spaceport extends Entity {
     this.set("depositTotal", Value.fromBigDecimal(value));
   }
 
-  get hardcap(): BigDecimal {
-    let value = this.get("hardcap");
-    return value.toBigDecimal();
-  }
-
-  set hardcap(value: BigDecimal) {
-    this.set("hardcap", Value.fromBigDecimal(value));
-  }
-
-  get softcap(): BigDecimal {
-    let value = this.get("softcap");
-    return value.toBigDecimal();
-  }
-
-  set softcap(value: BigDecimal) {
-    this.set("softcap", Value.fromBigDecimal(value));
-  }
-
   get stats(): Array<string> {
     let value = this.get("stats");
     return value.toStringArray();
@@ -197,24 +170,6 @@ export class Spaceport extends Entity {
 
   set stats(value: Array<string>) {
     this.set("stats", Value.fromStringArray(value));
-  }
-
-  get startBlock(): BigInt {
-    let value = this.get("startBlock");
-    return value.toBigInt();
-  }
-
-  set startBlock(value: BigInt) {
-    this.set("startBlock", Value.fromBigInt(value));
-  }
-
-  get endBlock(): BigInt {
-    let value = this.get("endBlock");
-    return value.toBigInt();
-  }
-
-  set endBlock(value: BigInt) {
-    this.set("endBlock", Value.fromBigInt(value));
   }
 
   get createdAtTimestamp(): BigInt {
@@ -233,6 +188,24 @@ export class Spaceport extends Entity {
 
   set createdAtBlockNumber(value: BigInt) {
     this.set("createdAtBlockNumber", Value.fromBigInt(value));
+  }
+
+  get startBlock(): BigInt {
+    let value = this.get("startBlock");
+    return value.toBigInt();
+  }
+
+  set startBlock(value: BigInt) {
+    this.set("startBlock", Value.fromBigInt(value));
+  }
+
+  get endBlock(): BigInt {
+    let value = this.get("endBlock");
+    return value.toBigInt();
+  }
+
+  set endBlock(value: BigInt) {
+    this.set("endBlock", Value.fromBigInt(value));
   }
 }
 
@@ -582,5 +555,45 @@ export class SpaceportStat extends Entity {
 
   set depositTotal(value: BigDecimal) {
     this.set("depositTotal", Value.fromBigDecimal(value));
+  }
+}
+
+export class UpdateQueue extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save UpdateQueue entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save UpdateQueue entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("UpdateQueue", id.toString(), this);
+  }
+
+  static load(id: string): UpdateQueue | null {
+    return store.get("UpdateQueue", id) as UpdateQueue | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get spaceports(): Array<string> {
+    let value = this.get("spaceports");
+    return value.toStringArray();
+  }
+
+  set spaceports(value: Array<string>) {
+    this.set("spaceports", Value.fromStringArray(value));
   }
 }

@@ -1,8 +1,9 @@
 import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
-import { Spaceport, SpaceportStat, Token } from '../types/schema';
+import { Spaceport, SpaceportStat, Token, UpdateQueue } from '../types/schema';
 import { ERC20 } from '../types/SpaceportFactory/ERC20';
 import { ERC20NameBytes } from '../types/SpaceportFactory/ERC20NameBytes';
 import { ERC20SymbolBytes } from '../types/SpaceportFactory/ERC20SymbolBytes';
+import { Spaceport as SpaceportContract } from '../types/SpaceportFactory/Spaceport';
 import {
   BI_18,
   LOG_ID,
@@ -10,7 +11,7 @@ import {
   ONE_DAY_IN_SECONDS,
   ONE_HOUR_IN_SECONDS, ONE_MONTH_IN_SECONDS,
   ONE_WEEK_IN_SECONDS,
-  PERIOD,
+  PERIOD, STATUS_ACTIVE, STATUS_QUEUED, STATUS_SUCCESS,
   ZERO_BI,
 } from './constants';
 
@@ -208,6 +209,58 @@ export function getPeriodName(period: PERIOD): string {
     default:
       return 'ONE_HOUR';
   }
+}
+
+export function getStatus(statusId: BigInt): string {
+  if (statusId.equals(STATUS_QUEUED)) {
+    return 'QUEUED';
+  } else if (statusId.equals(STATUS_ACTIVE)) {
+    return 'ACTIVE';
+  } else if (statusId.equals(STATUS_SUCCESS)) {
+    return 'SUCCESS';
+  } else {
+    return 'FAILED';
+  }
+}
+
+/**
+ * Add spaceport to the update queue
+ * @param spaceportId
+ * @param blockNumber
+ */
+export function addToUpdateQueue(spaceportId: string, blockNumber: BigInt): void {
+  let updateQueueId = blockNumber.plus(ONE_BI).toString();
+  let updateQueue = UpdateQueue.load(updateQueueId);
+  if (updateQueue === null) {
+    updateQueue = new UpdateQueue(updateQueueId);
+    updateQueue.spaceports = [];
+  }
+  let spaceports = updateQueue.spaceports;
+  spaceports.push(spaceportId);
+  updateQueue.spaceports = spaceports;
+
+  updateQueue.save();
+
+  logger('The space port has been added to the update queue {}', [updateQueueId]);
+}
+
+/**
+ * To call spaceport contract and get new status
+ * @param spaceportId
+ */
+export function updateSpaceportStatus(spaceportId: string): void {
+  let spaceport = Spaceport.load(spaceportId);
+  if (spaceport == null) {
+    return;
+  }
+  let spaceportContract = SpaceportContract.bind(Address.fromString(spaceportId));
+  let statusId = spaceportContract.spaceportStatus();
+
+  let oldStatus = spaceport.status;
+  spaceport.status = getStatus(statusId);
+  spaceport.save();
+
+  logger('The spaceport status has been changed {} => {}', [oldStatus, spaceport.status]);
 }
 
 /**

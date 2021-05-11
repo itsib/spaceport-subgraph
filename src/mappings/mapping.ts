@@ -1,16 +1,33 @@
-import { BigDecimal } from '@graphprotocol/graph-ts';
+import { BigDecimal, store } from '@graphprotocol/graph-ts';
 import { Participant, Spaceport, Token, Transaction, User } from '../types/schema';
 import {
+  ForceFailByPlfiCall,
+  ForceFailIfPairExistsCall,
   spaceportAddLiquidity,
   spaceportOwnerWithdrawTokens,
-  spaceportUserDeposit, spaceportUserWithdrawBaseTokens, spaceportUserWithdrawTokens,
+  spaceportUserDeposit,
+  spaceportUserWithdrawBaseTokens,
+  spaceportUserWithdrawTokens,
+  UpdateBlocksCall,
 } from '../types/templates/Spaceport/Spaceport';
-import { BI_18, ONE_BI, ZERO_BD } from './constants';
-import { convertTokenToDecimal, createTimeFrames, logger } from './helpers';
-
+import { BI_18, ONE_BI, STATUS_FAILED, ZERO_BD } from './constants';
+import {
+  addToUpdateQueue,
+  convertTokenToDecimal,
+  createTimeFrames,
+  getStatus,
+  logger,
+  updateSpaceportStatus,
+} from './helpers';
 
 export function handleSpaceportAddLiquidity(event: spaceportAddLiquidity): void {
-
+  let spaceportId = event.address.toHexString()
+  let spaceport = Spaceport.load(spaceportId)
+  if (spaceport === null) {
+    logger('There is no spaceport with address {}', [spaceportId]);
+    return;
+  }
+  updateSpaceportStatus(spaceportId);
 }
 
 export function handleSpaceportOwnerWithdrawTokens(event: spaceportOwnerWithdrawTokens): void {
@@ -142,4 +159,43 @@ export function handleSpaceportUserWithdrawBaseTokens(event: spaceportUserWithdr
 
 export function handleSpaceportUserWithdrawTokens(event: spaceportUserWithdrawTokens): void {
 
+}
+
+export function handleUpdateBlocksCall(call: UpdateBlocksCall): void {
+  let spaceportId = call.to.toHexString()
+  let spaceport = Spaceport.load(spaceportId)
+  if (spaceport === null) {
+    logger('There is no spaceport with address {}', [spaceportId]);
+    return;
+  }
+
+  spaceport.startBlock = call.inputs._startBlock;
+  spaceport.endBlock = call.inputs._endBlock;
+
+  // Add startBlock to update spaceport queue
+  if (call.block.number.lt(call.inputs._startBlock)) {
+    addToUpdateQueue(spaceportId, call.inputs._startBlock);
+  }
+
+  // Add endBlock to update spaceport queue
+  if (call.block.number.lt(call.inputs._endBlock)) {
+    addToUpdateQueue(spaceportId, call.inputs._endBlock);
+  }
+
+  spaceport.save();
+}
+
+export function handleForceFailIfPairExistsCall(call: ForceFailIfPairExistsCall): void {
+  // call.transaction
+}
+
+export function handleForceFailByPlfiCall(call: ForceFailByPlfiCall): void {
+  let spaceportId = call.to.toHexString();
+  let spaceport = Spaceport.load(spaceportId)
+  if (spaceport === null) {
+    logger('There is no spaceport with address {}', [spaceportId]);
+    return;
+  }
+  spaceport.status = getStatus(STATUS_FAILED);
+  spaceport.save();
 }

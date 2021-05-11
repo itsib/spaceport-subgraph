@@ -4,6 +4,13 @@ type SpaceportFactory @entity {
   spaceportsLength: BigInt!
 }
 
+enum SpaceportStatus {
+  QUEUED
+  ACTIVE
+  SUCCESS
+  FAILED
+}
+
 type Spaceport @entity {
   id: ID!
   "Should be equal SpaceportFactory.spaceportsAtIndex"
@@ -12,23 +19,17 @@ type Spaceport @entity {
   spaceToken: Token!
   baseToken: Token!
   inEth: Boolean!
-  forceFailed: Boolean!
-  lpGenerationComplete: Boolean!
 
+  status: SpaceportStatus!
   participants: [Participant!]! @derivedFrom(field: "spaceport")
   "Count of participants with a positive deposit"
   participantsCount: BigInt!
-
   depositTotal: BigDecimal!
-  hardcap: BigDecimal!
-  softcap: BigDecimal!
-
   stats: [SpaceportStat!]! @derivedFrom(field: "spaceport")
-
-  startBlock: BigInt!
-  endBlock: BigInt!
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
+  startBlock: BigInt!
+  endBlock: BigInt!
 }
 
 type User @entity {
@@ -75,4 +76,10 @@ type SpaceportStat @entity {
 
   participantsCount: BigInt!
   depositTotal: BigDecimal!
+}
+
+type UpdateQueue @entity {
+  "Block number when to update spaceports from the array"
+  id: ID!
+  spaceports: [Spaceport!]!
 }
