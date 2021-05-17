@@ -127,13 +127,13 @@ export class Spaceport extends Entity {
     this.set("inEth", Value.fromBoolean(value));
   }
 
-  get status(): string {
+  get status(): BigInt {
     let value = this.get("status");
-    return value.toString();
+    return value.toBigInt();
   }
 
-  set status(value: string) {
-    this.set("status", Value.fromString(value));
+  set status(value: BigInt) {
+    this.set("status", Value.fromBigInt(value));
   }
 
   get participants(): Array<string> {
@@ -163,13 +163,22 @@ export class Spaceport extends Entity {
     this.set("depositTotal", Value.fromBigDecimal(value));
   }
 
-  get stats(): Array<string> {
-    let value = this.get("stats");
-    return value.toStringArray();
+  get lpGenerationComplete(): boolean {
+    let value = this.get("lpGenerationComplete");
+    return value.toBoolean();
   }
 
-  set stats(value: Array<string>) {
-    this.set("stats", Value.fromStringArray(value));
+  set lpGenerationComplete(value: boolean) {
+    this.set("lpGenerationComplete", Value.fromBoolean(value));
+  }
+
+  get lpGenerationCompleteTime(): BigInt {
+    let value = this.get("lpGenerationCompleteTime");
+    return value.toBigInt();
+  }
+
+  set lpGenerationCompleteTime(value: BigInt) {
+    this.set("lpGenerationCompleteTime", Value.fromBigInt(value));
   }
 
   get createdAtTimestamp(): BigInt {
@@ -188,6 +197,23 @@ export class Spaceport extends Entity {
 
   set createdAtBlockNumber(value: BigInt) {
     this.set("createdAtBlockNumber", Value.fromBigInt(value));
+  }
+
+  get finishedAtTimestamp(): BigInt | null {
+    let value = this.get("finishedAtTimestamp");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set finishedAtTimestamp(value: BigInt | null) {
+    if (value === null) {
+      this.unset("finishedAtTimestamp");
+    } else {
+      this.set("finishedAtTimestamp", Value.fromBigInt(value as BigInt));
+    }
   }
 
   get startBlock(): BigInt {
@@ -486,6 +512,15 @@ export class LatestUpdatedBlock extends Entity {
 
   set blockNumber(value: BigInt) {
     this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get blockTimestamp(): BigInt {
+    let value = this.get("blockTimestamp");
+    return value.toBigInt();
+  }
+
+  set blockTimestamp(value: BigInt) {
+    this.set("blockTimestamp", Value.fromBigInt(value));
   }
 }
 

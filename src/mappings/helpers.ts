@@ -13,7 +13,7 @@ import {
   ONE_MONTH_IN_SECONDS,
   ONE_WEEK_IN_SECONDS,
   PERIOD,
-  STATUS_ACTIVE,
+  STATUS_ACTIVE, STATUS_FAILED,
   STATUS_QUEUED,
   STATUS_SUCCESS,
   ZERO_BI,
@@ -210,7 +210,7 @@ export function getPeriodName(period: PERIOD): string {
   }
 }
 
-export function getStatus(statusId: BigInt): string {
+export function getStatusName(statusId: BigInt): string {
   if (statusId.equals(STATUS_QUEUED)) {
     return 'QUEUED';
   } else if (statusId.equals(STATUS_ACTIVE)) {
@@ -225,8 +225,9 @@ export function getStatus(statusId: BigInt): string {
 /**
  * To call spaceport contract and get new status
  * @param spaceportId
+ * @param timestamp
  */
-export function updateSpaceportStatus(spaceportId: string): void {
+export function updateSpaceportStatus(spaceportId: string, timestamp: BigInt): void {
   let spaceport = Spaceport.load(spaceportId);
   if (spaceport == null) {
     return;
@@ -239,16 +240,23 @@ export function updateSpaceportStatus(spaceportId: string): void {
   }
 
   let oldStatus = spaceport.status;
-  spaceport.status = getStatus(result.value);
+
+  if (spaceport.finishedAtTimestamp == null && (result.value.equals(STATUS_FAILED) || result.value.equals(STATUS_SUCCESS))) {
+    spaceport.finishedAtTimestamp = timestamp;
+  }
+  spaceport.status = result.value;
   spaceport.save();
 
-  logger('The spaceport status has been changed {} => {}', [oldStatus, spaceport.status]);
+  let oldStatusName = getStatusName(oldStatus);
+  let newStatusName = getStatusName(spaceport.status);
+
+  logger('The spaceport status has been changed {} => {}', [oldStatusName, newStatusName]);
 }
 
 /**
  * Add spaceport to the update queue
  * @param spaceportId
- * @param blockNumber
+ * @param blockNumber - The lock number when you need to update spaceport
  */
 export function addToUpdateQueue(spaceportId: string, blockNumber: BigInt): void {
   let updateQueueId = blockNumber.plus(ONE_BI).toString();

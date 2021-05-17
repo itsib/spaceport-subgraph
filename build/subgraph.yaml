@@ -31,9 +31,9 @@ dataSources:
           file: SpaceportFactory/abis/spaceport-factory.json
         - name: Spaceport
           file: SpaceportFactory/abis/spaceport.json
-      eventHandlers:
-        - event: spaceportRegistered(address)
-          handler: handleSpaceportRegistered
+      callHandlers:
+        - function: registerSpaceport(address)
+          handler: handleRegisterSpaceport
   - kind: ethereum/contract
     name: Updater
     network: kovan
@@ -90,17 +90,13 @@ templates:
         - name: Spaceport
           file: Spaceport/abis/spaceport.json
       eventHandlers:
-        - event: spaceportAddLiquidity()
-          handler: handleSpaceportAddLiquidity
-        - event: spaceportOwnerWithdrawTokens()
-          handler: handleSpaceportOwnerWithdrawTokens
         - event: spaceportUserDeposit(uint256)
           handler: handleSpaceportUserDeposit
-        - event: spaceportUserWithdrawBaseTokens(uint256)
-          handler: handleSpaceportUserWithdrawBaseTokens
-        - event: spaceportUserWithdrawTokens(uint256)
-          handler: handleSpaceportUserWithdrawTokens
       callHandlers:
+        - function: addLiquidity()
+          handler: handleAddLiquidity
+        - function: userWithdrawBaseTokens()
+          handler: handleUserWithdrawBaseTokens
         - function: updateBlocks(uint256,uint256)
           handler: handleUpdateBlocksCall
         - function: forceFailIfPairExists()
