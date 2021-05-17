@@ -1,9 +1,8 @@
 import { BigInt } from '@graphprotocol/graph-ts';
-import { ethereum, store } from '@graphprotocol/graph-ts/index';
-import { LatestUpdatedBlock, UpdateTask } from '../types/schema';
+import { ethereum } from '@graphprotocol/graph-ts/index';
+import { SpaceportsToUpdate } from '../types/schema';
 import { Approval, Deposit, Withdrawal } from '../types/Updater/Updater';
-import { ONE_BI, ONE_MINUTE_IN_SECONDS, THIRTEEN_BI, UPDATE_PERIOD_IN_SECONDS } from './constants';
-import { logger, updateSpaceportStatus } from './helpers';
+import { updateSpaceportStatus } from './helpers';
 
 export function handleWithdrawal(event: Withdrawal): void {
   updateSpaceports(event)
@@ -18,45 +17,47 @@ export function handleDeposit(event: Deposit): void {
 }
 
 function updateSpaceports(event: ethereum.Event): void {
-  // Get stored latest updated block
-  let lastUpdatedBlock = LatestUpdatedBlock.load('1');
-  if (lastUpdatedBlock === null) {
-    lastUpdatedBlock = new LatestUpdatedBlock('1');
-    lastUpdatedBlock.blockNumber = event.block.number.minus(ONE_BI);
-    lastUpdatedBlock.blockTimestamp = event.block.timestamp.minus(THIRTEEN_BI);
-  }
-
-  // Update stats every UPDATE_PERIOD_IN_SECONDS, not more often.
-  if (event.block.timestamp.minus(lastUpdatedBlock.blockTimestamp).lt(UPDATE_PERIOD_IN_SECONDS)) {
+  let spaceportsToUpdate = SpaceportsToUpdate.load('1');
+  if (spaceportsToUpdate === null || spaceportsToUpdate.latestUpdatedBlock.equals(event.block.number)) {
     return;
   }
 
-  // Call updateSpaceportStatus for each spaceport from queue
-  let blocksCount = event.block.number.minus(lastUpdatedBlock.blockNumber).toI32();
-  for (let i = 0; i < blocksCount; ++i) {
-    let updateQueueId = lastUpdatedBlock.blockNumber.plus(BigInt.fromI32(i)).toString();
-    let updateQueue = UpdateTask.load(updateQueueId);
+  let spaceports: string[] = spaceportsToUpdate.spaceports;
+  let blockNumbers: BigInt[] = spaceportsToUpdate.blockNumbers;
 
-    if (updateQueue !== null) {
-      handleQueue(updateQueue as UpdateTask, event);
+  let spaceportsIdsNotUpdate = new Array<string>(0);
+  let blockNumbersNotUpdate = new Array<BigInt>(0);
+  let spaceportsIdsToUpdate = new Array<string>(0);
 
-      store.remove('UpdateTask', updateQueueId);
-      logger('Spaceport has been updated for block number - {}', [updateQueueId])
+  // Find spaceports to update
+  for (let i = 0; i < spaceports.length; ++i) {
+    let spaceportId = spaceports[i];
+    let blockNumber = blockNumbers[i];
+
+    if (blockNumber.le(event.block.number)) {
+      let index = spaceportsIdsToUpdate.indexOf(spaceportId as string);
+      if (index == -1) {
+        spaceportsIdsToUpdate.push(spaceportId as string);
+      }
+    } else {
+      spaceportsIdsNotUpdate.push(spaceportId as string);
+      blockNumbersNotUpdate.push(blockNumber as BigInt);
     }
   }
 
-  // Store block number as latest handled
-  lastUpdatedBlock.blockNumber = event.block.number;
-  lastUpdatedBlock.blockTimestamp = event.block.timestamp;
-  lastUpdatedBlock.save();
-}
+  // Nothing to update
+  if (spaceportsIdsToUpdate.length == 0) {
+    return;
+  }
 
-function handleQueue(updateQueue: UpdateTask, event: ethereum.Event): void {
-  let currentBlockTime = event.block.timestamp;
-  let spaceports = updateQueue.spaceports;
+  spaceportsToUpdate.latestUpdatedBlock = event.block.number;
+  spaceportsToUpdate.spaceports = spaceportsIdsNotUpdate;
+  spaceportsToUpdate.blockNumbers = blockNumbersNotUpdate;
+  spaceportsToUpdate.save();
 
-  for (let j = 0; j < spaceports.length; j++) {
-    let spaceportId = spaceports[j];
-    updateSpaceportStatus(spaceportId, currentBlockTime);
+  // Update spaceports
+  for (let i = 0; i < spaceportsIdsToUpdate.length; i++) {
+    let spaceportId = spaceportsIdsToUpdate[i];
+    updateSpaceportStatus(spaceportId, event.block.timestamp);
   }
 }

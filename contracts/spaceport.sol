@@ -741,6 +741,9 @@ contract Spaceportv1 is ReentrancyGuard {
         _;
     }
 
+    // block.number = 24827636  block.number +1 (24827636)
+    // START_BLOCK  = 24826825  block.number === START_BLOCK
+    // END_BLOCK    = 24827636  block.number < END_BLOCK
     function spaceportStatus () public view returns (uint256) {
         if (STATUS.FORCE_FAILED) {
             return 3; // FAILED - force fail

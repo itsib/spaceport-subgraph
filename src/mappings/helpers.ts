@@ -1,23 +1,11 @@
-import { Address, BigDecimal, BigInt, log } from '@graphprotocol/graph-ts';
-import { Spaceport, SpaceportStat, Token, UpdateTask } from '../types/schema';
+import { Address, BigDecimal, BigInt } from '@graphprotocol/graph-ts';
+import { Spaceport, SpaceportStatistic, SpaceportsToUpdate, Token } from '../types/schema';
 import { ERC20 } from '../types/SpaceportFactory/ERC20';
 import { ERC20NameBytes } from '../types/SpaceportFactory/ERC20NameBytes';
 import { ERC20SymbolBytes } from '../types/SpaceportFactory/ERC20SymbolBytes';
 import { Spaceport as SpaceportContract } from '../types/SpaceportFactory/Spaceport';
-import {
-  BI_18,
-  LOG_ID,
-  ONE_BI,
-  ONE_DAY_IN_SECONDS,
-  ONE_HOUR_IN_SECONDS,
-  ONE_MONTH_IN_SECONDS,
-  ONE_WEEK_IN_SECONDS,
-  PERIOD,
-  STATUS_ACTIVE, STATUS_FAILED,
-  STATUS_QUEUED,
-  STATUS_SUCCESS,
-  ZERO_BI,
-} from './constants';
+import { BI_18, ONE_BI, STATUS_ACTIVE, STATUS_FAILED, STATUS_QUEUED, STATUS_SUCCESS, ZERO_BI } from './constants';
+import { logger, warning } from './log';
 
 export function isNullEthValue(value: string): boolean {
   return value == '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -143,71 +131,18 @@ export function convertTokenToDecimal(tokenAmount: BigInt, exchangeDecimals: Big
  * @param blockTimestamp
  * @param spaceport
  */
-export function createTimeFrames(blockTimestamp: BigInt, spaceport: Spaceport): void {
-  let periods = new Array<PERIOD>(4);
-  periods[0] = PERIOD.ONE_HOUR;
-  periods[1] = PERIOD.ONE_DAY;
-  periods[2] = PERIOD.ONE_WEEK;
-  periods[3] = PERIOD.ONE_MONTH;
+export function createTimeframe(blockTimestamp: BigInt, spaceport: Spaceport): void {
+  let timeframeId = blockTimestamp.toString() + "-" + spaceport.id;
 
-  for (let i = 0; i < periods.length; i++) {
-    let period = periods[i];
-    let periodInSeconds = periodToSeconds(period);
-    let periodIndex = blockTimestamp.div(periodInSeconds); // Get unique hour within unix history
-    let periodStart = periodIndex.times(periodInSeconds); // Want the rounded effect
-    let timeFrameID = periodIndex.toString() + "-" + spaceport.id;
-
-    let timeFrame = SpaceportStat.load(timeFrameID);
-    if (timeFrame === null) {
-      timeFrame = new SpaceportStat(timeFrameID);
-      timeFrame.spaceport = spaceport.id;
-      timeFrame.period = getPeriodName(period);
-      timeFrame.periodStart = periodStart;
-    }
-
-    timeFrame.participantsCount = spaceport.participantsCount;
-    timeFrame.depositTotal = spaceport.depositTotal;
-
-    timeFrame.save();
+  let timeframe = SpaceportStatistic.load(timeframeId);
+  if (timeframe === null) {
+    timeframe = new SpaceportStatistic(timeframeId);
+    timeframe.spaceport = spaceport.id;
+    timeframe.timestamp = blockTimestamp;
   }
-}
-
-/**
- * Converting period name to period in seconds (PERIOD.ONE_HOUR => 3600)
- * @param period
- */
-export function periodToSeconds(period: PERIOD): BigInt {
-  switch (period) {
-    case PERIOD.ONE_HOUR:
-      return ONE_HOUR_IN_SECONDS;
-    case PERIOD.ONE_DAY:
-      return ONE_DAY_IN_SECONDS;
-    case PERIOD.ONE_WEEK:
-      return ONE_WEEK_IN_SECONDS;
-    case PERIOD.ONE_MONTH:
-      return ONE_MONTH_IN_SECONDS;
-    default:
-      return ONE_HOUR_IN_SECONDS;
-  }
-}
-
-/**
- * Returns period name for stored in BD
- * @param period
- */
-export function getPeriodName(period: PERIOD): string {
-  switch (period) {
-    case PERIOD.ONE_HOUR:
-      return 'ONE_HOUR';
-    case PERIOD.ONE_DAY:
-      return 'ONE_DAY';
-    case PERIOD.ONE_WEEK:
-      return 'ONE_WEEK';
-    case PERIOD.ONE_MONTH:
-      return 'ONE_MONTH';
-    default:
-      return 'ONE_HOUR';
-  }
+  timeframe.participantsCount = spaceport.participantsCount;
+  timeframe.depositTotal = spaceport.depositTotal;
+  timeframe.save();
 }
 
 export function getStatusName(statusId: BigInt): string {
@@ -230,6 +165,7 @@ export function getStatusName(statusId: BigInt): string {
 export function updateSpaceportStatus(spaceportId: string, timestamp: BigInt): void {
   let spaceport = Spaceport.load(spaceportId);
   if (spaceport == null) {
+    warning('There is no spaceport with address {}', [spaceportId]);
     return;
   }
   let spaceportContract = SpaceportContract.bind(Address.fromString(spaceportId));
@@ -256,48 +192,29 @@ export function updateSpaceportStatus(spaceportId: string, timestamp: BigInt): v
 /**
  * Add spaceport to the update queue
  * @param spaceportId
- * @param blockNumber - The lock number when you need to update spaceport
+ * @param updateAtBlockNumbers
  */
-export function addToUpdateQueue(spaceportId: string, blockNumber: BigInt): void {
-  let updateQueueId = blockNumber.plus(ONE_BI).toString();
-  let updateQueue = UpdateTask.load(updateQueueId);
-  if (updateQueue === null) {
-    updateQueue = new UpdateTask(updateQueueId);
-    updateQueue.spaceports = [];
+export function addToUpdateQueue(spaceportId: string, updateAtBlockNumbers: Array<BigInt>): void {
+  let spaceportsToUpdate = SpaceportsToUpdate.load('1');
+  if (spaceportsToUpdate === null) {
+    spaceportsToUpdate = new SpaceportsToUpdate('1');
+    spaceportsToUpdate.latestUpdatedBlock = ONE_BI;
+    spaceportsToUpdate.spaceports = [];
+    spaceportsToUpdate.blockNumbers = [];
   }
 
-  // Check if an address has been added to this queue
-  let spaceportIds = updateQueue.spaceports;
-  let index = spaceportIds.indexOf(spaceportId);
-  if (index == -1) {
-    let spaceports = updateQueue.spaceports;
+  let spaceports = spaceportsToUpdate.spaceports;
+  let blockNumbers = spaceportsToUpdate.blockNumbers;
+
+  for (let i = 0; i < updateAtBlockNumbers.length; ++i) {
     spaceports.push(spaceportId);
-    updateQueue.spaceports = spaceports;
-
-    updateQueue.save();
-
-    logger('The space port has been added to the update queue {}', [updateQueueId]);
-  } else {
-    warning('The space port id already added to queue {}', [spaceportId])
+    blockNumbers.push(updateAtBlockNumbers[i]);
   }
-}
 
-/**
- * Write log message in graph console with the log ID
- * @param msg
- * @param args
- */
-export function logger(msg: string, args: Array<string>): void {
-  args.unshift(LOG_ID)
-  log.info('{}: ' + msg, args);
-}
+  spaceportsToUpdate.spaceports = spaceports;
+  spaceportsToUpdate.blockNumbers = blockNumbers;
 
-/**
- * Write log message in graph console with the log ID
- * @param msg
- * @param args
- */
-export function warning(msg: string, args: Array<string>): void {
-  args.unshift(LOG_ID)
-  log.warning('{}: ' + msg, args);
+  spaceportsToUpdate.save();
+
+  logger('The spaceport {} has been added to the update queue', [spaceportId]);
 }

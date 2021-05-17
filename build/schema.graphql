@@ -7,7 +7,7 @@ type SpaceportFactory @entity {
 type Spaceport @entity {
   id: ID!
   "Should be equal SpaceportFactory.spaceportsAtIndex"
-  spaceportIndex: BigInt!
+  index: BigInt!
   owner: String!
   spaceToken: Token!
   baseToken: Token!
@@ -46,30 +46,18 @@ type Token @entity {
   decimals: BigInt!
 }
 
-enum TimeFramePeriod {
-  ONE_HOUR
-  ONE_DAY
-  ONE_WEEK
-  ONE_MONTH
-}
-
-type SpaceportStat @entity {
+type SpaceportStatistic @entity {
   id: ID!
   spaceport: Spaceport!
-  period: TimeFramePeriod!
-  periodStart: BigInt!
+  timestamp: BigInt!
 
   participantsCount: BigInt!
   depositTotal: BigDecimal!
 }
 
-type LatestUpdatedBlock @entity {
+type SpaceportsToUpdate @entity {
   id: ID!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-}
-
-type UpdateTask @entity {
-  id: ID!
+  latestUpdatedBlock: BigInt!
+  blockNumbers: [BigInt!]!
   spaceports: [String!]!
 }

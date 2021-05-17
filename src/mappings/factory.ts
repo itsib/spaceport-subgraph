@@ -4,7 +4,7 @@ import { Spaceport as SpaceportContract } from '../types/SpaceportFactory/Spacep
 import { RegisterSpaceportCall } from '../types/SpaceportFactory/SpaceportFactory';
 import { Spaceport as SpaceportTemplate } from '../types/templates'
 import { ONE_BI, ZERO_BD, ZERO_BI } from './constants';
-import { addToUpdateQueue, createTimeFrames, getOrCreateToken } from './helpers';
+import { addToUpdateQueue, createTimeframe, getOrCreateToken } from './helpers';
 
 export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
   let spaceportFactoryId = call.to.toHexString()
@@ -29,7 +29,7 @@ export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
     let spaceToken = getOrCreateToken(spaceTokenAddress);
     let baseToken = getOrCreateToken(baseTokenAddress);
 
-    spaceport.spaceportIndex = spaceportFactory.spaceportsLength;
+    spaceport.index = spaceportFactory.spaceportsLength;
     spaceport.spaceToken = spaceToken.id;
     spaceport.baseToken = baseToken.id;
     spaceport.inEth = spaceportInfo.value13;
@@ -46,20 +46,13 @@ export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
 
     spaceport.save();
 
-    // Add startBlock to update spaceport queue
-    if (call.block.number.lt(spaceport.startBlock)) {
-      addToUpdateQueue(spaceportId, spaceport.startBlock);
-    }
-
-    // Add endBlock to update spaceport queue
-    if (call.block.number.lt(spaceport.endBlock)) {
-      addToUpdateQueue(spaceportId, spaceport.endBlock);
-    }
+    // Add spaceport to update queue
+    addToUpdateQueue(spaceportId, [spaceport.startBlock, spaceport.endBlock.plus(ONE_BI)]);
 
     spaceportFactory.spaceportsLength = spaceportFactory.spaceportsLength.plus(ONE_BI);
     spaceportFactory.save();
 
-    createTimeFrames(call.block.timestamp, spaceport as Spaceport);
+    createTimeframe(call.block.timestamp, spaceport as Spaceport);
 
     // Create the tracked contract based on the template
     SpaceportTemplate.create(call.inputs._spaceportAddress);

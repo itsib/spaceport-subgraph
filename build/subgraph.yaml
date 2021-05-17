@@ -89,10 +89,9 @@ templates:
           file: Spaceport/abis/spaceport-factory.json
         - name: Spaceport
           file: Spaceport/abis/spaceport.json
-      eventHandlers:
-        - event: spaceportUserDeposit(uint256)
-          handler: handleSpaceportUserDeposit
       callHandlers:
+        - function: userDeposit(uint256)
+          handler: handleUserDeposit
         - function: addLiquidity()
           handler: handleAddLiquidity
         - function: userWithdrawBaseTokens()

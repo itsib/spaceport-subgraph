@@ -82,13 +82,13 @@ export class Spaceport extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get spaceportIndex(): BigInt {
-    let value = this.get("spaceportIndex");
+  get index(): BigInt {
+    let value = this.get("index");
     return value.toBigInt();
   }
 
-  set spaceportIndex(value: BigInt) {
-    this.set("spaceportIndex", Value.fromBigInt(value));
+  set index(value: BigInt) {
+    this.set("index", Value.fromBigInt(value));
   }
 
   get owner(): string {
@@ -399,7 +399,7 @@ export class Token extends Entity {
   }
 }
 
-export class SpaceportStat extends Entity {
+export class SpaceportStatistic extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -407,17 +407,17 @@ export class SpaceportStat extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save SpaceportStat entity without an ID");
+    assert(id !== null, "Cannot save SpaceportStatistic entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save SpaceportStat entity with non-string ID. " +
+      "Cannot save SpaceportStatistic entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("SpaceportStat", id.toString(), this);
+    store.set("SpaceportStatistic", id.toString(), this);
   }
 
-  static load(id: string): SpaceportStat | null {
-    return store.get("SpaceportStat", id) as SpaceportStat | null;
+  static load(id: string): SpaceportStatistic | null {
+    return store.get("SpaceportStatistic", id) as SpaceportStatistic | null;
   }
 
   get id(): string {
@@ -438,22 +438,13 @@ export class SpaceportStat extends Entity {
     this.set("spaceport", Value.fromString(value));
   }
 
-  get period(): string {
-    let value = this.get("period");
-    return value.toString();
-  }
-
-  set period(value: string) {
-    this.set("period", Value.fromString(value));
-  }
-
-  get periodStart(): BigInt {
-    let value = this.get("periodStart");
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
     return value.toBigInt();
   }
 
-  set periodStart(value: BigInt) {
-    this.set("periodStart", Value.fromBigInt(value));
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
   }
 
   get participantsCount(): BigInt {
@@ -475,7 +466,7 @@ export class SpaceportStat extends Entity {
   }
 }
 
-export class LatestUpdatedBlock extends Entity {
+export class SpaceportsToUpdate extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -483,17 +474,17 @@ export class LatestUpdatedBlock extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save LatestUpdatedBlock entity without an ID");
+    assert(id !== null, "Cannot save SpaceportsToUpdate entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save LatestUpdatedBlock entity with non-string ID. " +
+      "Cannot save SpaceportsToUpdate entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("LatestUpdatedBlock", id.toString(), this);
+    store.set("SpaceportsToUpdate", id.toString(), this);
   }
 
-  static load(id: string): LatestUpdatedBlock | null {
-    return store.get("LatestUpdatedBlock", id) as LatestUpdatedBlock | null;
+  static load(id: string): SpaceportsToUpdate | null {
+    return store.get("SpaceportsToUpdate", id) as SpaceportsToUpdate | null;
   }
 
   get id(): string {
@@ -505,53 +496,22 @@ export class LatestUpdatedBlock extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get blockNumber(): BigInt {
-    let value = this.get("blockNumber");
+  get latestUpdatedBlock(): BigInt {
+    let value = this.get("latestUpdatedBlock");
     return value.toBigInt();
   }
 
-  set blockNumber(value: BigInt) {
-    this.set("blockNumber", Value.fromBigInt(value));
+  set latestUpdatedBlock(value: BigInt) {
+    this.set("latestUpdatedBlock", Value.fromBigInt(value));
   }
 
-  get blockTimestamp(): BigInt {
-    let value = this.get("blockTimestamp");
-    return value.toBigInt();
+  get blockNumbers(): Array<BigInt> {
+    let value = this.get("blockNumbers");
+    return value.toBigIntArray();
   }
 
-  set blockTimestamp(value: BigInt) {
-    this.set("blockTimestamp", Value.fromBigInt(value));
-  }
-}
-
-export class UpdateTask extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id !== null, "Cannot save UpdateTask entity without an ID");
-    assert(
-      id.kind == ValueKind.STRING,
-      "Cannot save UpdateTask entity with non-string ID. " +
-        'Considering using .toHex() to convert the "id" to a string.'
-    );
-    store.set("UpdateTask", id.toString(), this);
-  }
-
-  static load(id: string): UpdateTask | null {
-    return store.get("UpdateTask", id) as UpdateTask | null;
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    return value.toString();
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
+  set blockNumbers(value: Array<BigInt>) {
+    this.set("blockNumbers", Value.fromBigIntArray(value));
   }
 
   get spaceports(): Array<string> {

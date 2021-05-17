@@ -39,6 +39,7 @@ dataSources:
     name: Updater
     network: kovan
     source:
+#      address: '0xc00e94cb662c3520282e6f5717214004a7f26888'
       address: '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
       abi: Updater
       startBlock: 24389611
@@ -92,10 +93,9 @@ templates:
           file: ./abis/spaceport-factory.json
         - name: Spaceport
           file: ./abis/spaceport.json
-      eventHandlers:
-        - event: spaceportUserDeposit(uint256)
-          handler: handleSpaceportUserDeposit
       callHandlers:
+        - function: userDeposit(uint256)
+          handler: handleUserDeposit
         - function: addLiquidity()
           handler: handleAddLiquidity
         - function: userWithdrawBaseTokens()
