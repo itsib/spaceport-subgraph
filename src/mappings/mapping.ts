@@ -45,8 +45,10 @@ export function handleUserDeposit(call: UserDepositCall): void {
   if (participant == null) {
     participant = new Participant(participantId);
     participant.participant = userId;
+    participant.spaceToken = spaceport.spaceToken;
     participant.spaceport = spaceportId;
     participant.deposit = ZERO_BD;
+    participant.timestamp = call.block.timestamp;
 
     spaceport.participantsCount = spaceport.participantsCount.plus(ONE_BI);
   }

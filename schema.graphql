@@ -36,7 +36,9 @@ type Participant @entity {
   id: ID!
   participant: User!
   spaceport: Spaceport!
+  spaceToken: Token!
   deposit: BigDecimal!
+  timestamp: BigInt!
 }
 
 type Token @entity {
