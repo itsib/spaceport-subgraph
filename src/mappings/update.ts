@@ -1,10 +1,14 @@
 import { BigInt } from '@graphprotocol/graph-ts';
 import { ethereum } from '@graphprotocol/graph-ts/index';
 import { SpaceportsToUpdate } from '../types/schema';
-import { Approval, Deposit, Withdrawal } from '../types/Updater/Updater';
+import { Approval, Deposit, Transfer, Withdrawal } from '../types/Updater/Updater';
 import { updateSpaceportStatus } from './helpers';
 
 export function handleWithdrawal(event: Withdrawal): void {
+  updateSpaceports(event)
+}
+
+export function handleTransfer(event: Transfer): void {
   updateSpaceports(event)
 }
 

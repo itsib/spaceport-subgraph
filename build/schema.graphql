@@ -1,0 +1,63 @@
+type SpaceportFactory @entity {
+  id: ID!
+  "Should be equal SpaceportFactory.spaceportsLength"
+  spaceportsLength: BigInt!
+}
+
+type Spaceport @entity {
+  id: ID!
+  "Should be equal SpaceportFactory.spaceportsAtIndex"
+  index: BigInt!
+  owner: String!
+  spaceToken: Token!
+  baseToken: Token!
+  inEth: Boolean!
+  "0 = QUEUED; 1 = ACTIVE; 2 = SUCCESS; 3 = FAILED"
+  status: BigInt!
+  participants: [Participant!]! @derivedFrom(field: "spaceport")
+  "Count of participants with a positive deposit"
+  participantsCount: BigInt!
+  depositTotal: BigDecimal!
+  lpGenerationComplete: Boolean!
+  lpGenerationCompleteTime: BigInt!
+  createdAtTimestamp: BigInt!
+  createdAtBlockNumber: BigInt!
+  finishedAtTimestamp: BigInt
+  startBlock: BigInt!
+  endBlock: BigInt!
+}
+
+type User @entity {
+  id: ID!
+  spaceports: [Participant!] @derivedFrom(field: "participant")
+}
+
+type Participant @entity {
+  id: ID!
+  participant: User!
+  spaceport: Spaceport!
+  deposit: BigDecimal!
+}
+
+type Token @entity {
+  id: ID!
+  symbol: String!
+  name: String!
+  decimals: BigInt!
+}
+
+type SpaceportStatistic @entity {
+  id: ID!
+  spaceport: Spaceport!
+  timestamp: BigInt!
+
+  participantsCount: BigInt!
+  depositTotal: BigDecimal!
+}
+
+type SpaceportsToUpdate @entity {
+  id: ID!
+  latestUpdatedBlock: BigInt!
+  blockNumbers: [BigInt!]!
+  spaceports: [String!]!
+}
