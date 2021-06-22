@@ -6,11 +6,11 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: SpaceportFactory
-    network: mainnet
+    network: kovan
     source:
-      address: "0x67019Edf7E115d17086e1660b577CAdccc57dFf3"
+      address: "0x814Aea5660fA1a0b6E156b1Aa0C955581FCB5F88"
       abi: SpaceportFactory
-      startBlock: 12587304
+      startBlock: 24389611
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -36,11 +36,11 @@ dataSources:
           handler: handleRegisterSpaceport
   - kind: ethereum/contract
     name: Updater
-    network: mainnet
+    network: kovan
     source:
-      address: "0xc00e94cb662c3520282e6f5717214004a7f26888"
+      address: "0xd0A1E359811322d97991E03f863a0C30C2cF029C"
       abi: Updater
-      startBlock: 12587304
+      startBlock: 24389611
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.4
@@ -56,12 +56,14 @@ dataSources:
         - name: Updater
           file: Updater/abis/updater.json
       eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
+        - event: Withdrawal(indexed address,uint256)
+          handler: handleWithdrawal
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
 templates:
   - kind: ethereum/contract
     name: Spaceport
-    network: mainnet
+    network: kovan
     source:
       abi: Spaceport
     mapping:

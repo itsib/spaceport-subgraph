@@ -6,7 +6,7 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: SpaceportFactory
-    network: mainnet
+    network: kovan
     source:
       address: '0x814Aea5660fA1a0b6E156b1Aa0C955581FCB5F88'
       abi: SpaceportFactory
@@ -37,7 +37,7 @@ dataSources:
 
   - kind: ethereum/contract
     name: Updater
-    network: mainnet
+    network: kovan
     source:
       address: '0xd0A1E359811322d97991E03f863a0C30C2cF029C'
       abi: Updater
@@ -68,7 +68,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: Spaceport
-    network: mainnet
+    network: kovan
     source:
       abi: Spaceport
     mapping:
