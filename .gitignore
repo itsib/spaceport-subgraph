@@ -61,5 +61,5 @@ typings/
 .next
 
 .idea
-./src/types
-./build
+src/types/
+build/
