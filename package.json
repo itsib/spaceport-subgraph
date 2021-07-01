@@ -2,8 +2,6 @@
   "name": "spaceport-subgraph",
   "version": "0.1.0",
   "scripts": {
-    "create": "graph create itsib/spaceport-subgraph-kovan --node https://api.thegraph.com/deploy/",
-    "create-local": "graph create itsib/spaceport-subgraph-kovan --node http://127.0.0.1:8020",
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
     "deploy": "graph deploy itsib/spaceport-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.yaml",

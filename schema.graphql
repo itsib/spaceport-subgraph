@@ -9,6 +9,9 @@ type Spaceport @entity {
   "Should be equal SpaceportFactory.spaceportsAtIndex"
   index: BigInt!
   owner: String!
+  tokenPrice: BigInt!
+  listingRate: BigInt!
+  liquidityPercent: BigInt!
   spaceToken: Token!
   baseToken: Token!
   inEth: Boolean!

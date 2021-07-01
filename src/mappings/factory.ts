@@ -37,6 +37,9 @@ export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
     spaceport.participantsCount = ZERO_BI;
     spaceport.depositTotal = ZERO_BD;
     spaceport.owner = spaceportInfo.value0.toHex();
+    spaceport.tokenPrice = spaceportInfo.value3;
+    spaceport.listingRate = spaceportInfo.value9;
+    spaceport.liquidityPercent = spaceportInfo.value8;
     spaceport.lpGenerationComplete = false;
     spaceport.lpGenerationCompleteTime = ZERO_BI;
     spaceport.startBlock = spaceportInfo.value10;
@@ -51,8 +54,6 @@ export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
 
     spaceportFactory.spaceportsLength = spaceportFactory.spaceportsLength.plus(ONE_BI);
     spaceportFactory.save();
-
-    createTimeframe(call.block.timestamp, spaceport as Spaceport);
 
     // Create the tracked contract based on the template
     SpaceportTemplate.create(call.inputs._spaceportAddress);
