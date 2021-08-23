@@ -1,16 +1,20 @@
 {
   "name": "spaceport-subgraph",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "scripts": {
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
+    "create-local": "graph create itsib/spaceport-subgraph --node http://127.0.0.1:8020",
+    "deploy-local": "graph deploy itsib/spaceport-subgraph --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020 subgraph.yaml",
     "deploy": "graph deploy itsib/spaceport-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.yaml",
+    "deploy:bsc": "graph deploy itsib/spaceport-subgraph-bsc --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.bsc.yaml",
+    "deploy:matic": "graph deploy itsib/spaceport-subgraph-polygon --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.matic.yaml",
     "deploy:kovan": "graph deploy itsib/spaceport-subgraph-kovan --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.kovan.yaml",
-    "deploy:local": "graph deploy itsib/spaceport-subgraph --ipfs http://localhost:5001 --node http://127.0.0.1:8020 subgraph.kovan.yaml"
+    "deploy:local": "graph deploy itsib/spaceport-subgraph --ipfs http://localhost:5001 --node http://127.0.0.1:8020 subgraph.matic.yaml"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.20.0",
-    "@graphprotocol/graph-ts": "^0.20.0"
+    "@graphprotocol/graph-cli": "^0.21.1",
+    "@graphprotocol/graph-ts": "^0.20.1"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",

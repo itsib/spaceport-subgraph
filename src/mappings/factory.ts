@@ -4,7 +4,7 @@ import { Spaceport as SpaceportContract } from '../types/SpaceportFactory/Spacep
 import { RegisterSpaceportCall } from '../types/SpaceportFactory/SpaceportFactory';
 import { Spaceport as SpaceportTemplate } from '../types/templates'
 import { ONE_BI, ZERO_BD, ZERO_BI } from './constants';
-import { addToUpdateQueue, createTimeframe, getOrCreateToken } from './helpers';
+import { addToUpdateQueue, getOrCreateToken } from './helpers';
 
 export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
   let spaceportFactoryId = call.to.toHexString()
