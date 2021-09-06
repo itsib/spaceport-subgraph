@@ -63,3 +63,5 @@ typings/
 .idea
 src/types/
 build/
+
+subgraph.yaml

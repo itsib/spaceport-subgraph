@@ -4,17 +4,20 @@
   "scripts": {
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
-    "create-local": "graph create itsib/spaceport-subgraph --node http://127.0.0.1:8020",
-    "deploy-local": "graph deploy itsib/spaceport-subgraph --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020 subgraph.yaml",
-    "deploy": "graph deploy itsib/spaceport-subgraph --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.yaml",
-    "deploy:bsc": "graph deploy itsib/spaceport-subgraph-bsc --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.bsc.yaml",
-    "deploy:matic": "graph deploy itsib/spaceport-subgraph-polygon --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.matic.yaml",
-    "deploy:kovan": "graph deploy itsib/spaceport-subgraph-kovan --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/ subgraph.kovan.yaml",
-    "deploy:local": "graph deploy itsib/spaceport-subgraph --ipfs http://localhost:5001 --node http://127.0.0.1:8020 subgraph.matic.yaml"
+    "create": "graph create spaceport/kovan --node http://localhost:4000/deploy/",
+    "prepare:mainnet": "node tmpl/prepare.js mainnet",
+    "prepare:matic": "node tmpl/prepare.js matic",
+    "prepare:bsc": "node tmpl/prepare.js bsc",
+    "prepare:kovan": "node tmpl/prepare.js kovan",
+    "deploy:mainnet": "npm run prepare:mainnet && graph deploy spaceport/mainnet --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/",
+    "deploy:matic": "npm run prepare:matic && graph deploy spaceport/matic --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/",
+    "deploy:bsc": "npm run prepare:bsc && graph deploy spaceport/bsc --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/",
+    "deploy:kovan": "npm run prepare:kovan && graph deploy spaceport/kovan --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/"
   },
   "devDependencies": {
-    "@graphprotocol/graph-cli": "^0.21.1",
-    "@graphprotocol/graph-ts": "^0.20.1"
+    "@graphprotocol/graph-cli": "^0.16.0",
+    "@graphprotocol/graph-ts": "^0.16.0",
+    "handlebars": "^4.7.7"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",

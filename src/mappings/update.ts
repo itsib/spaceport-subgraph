@@ -1,5 +1,5 @@
 import { BigInt } from '@graphprotocol/graph-ts';
-import { ethereum } from '@graphprotocol/graph-ts/index';
+import { EthereumEvent } from '@graphprotocol/graph-ts/index';
 import { SpaceportsToUpdate } from '../types/schema';
 import { Approval, Deposit, Transfer, Withdrawal } from '../types/Updater/Updater';
 import { updateSpaceportStatus } from './helpers';
@@ -20,7 +20,7 @@ export function handleDeposit(event: Deposit): void {
   updateSpaceports(event)
 }
 
-function updateSpaceports(event: ethereum.Event): void {
+function updateSpaceports(event: EthereumEvent): void {
   let spaceportsToUpdate = SpaceportsToUpdate.load('1');
   if (spaceportsToUpdate === null || spaceportsToUpdate.latestUpdatedBlock.equals(event.block.number)) {
     return;

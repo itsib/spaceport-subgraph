@@ -1,0 +1,17 @@
+{
+  "description": "Collect Spaceports contracts analytics.",
+  "factoryAddress": "0x814Aea5660fA1a0b6E156b1Aa0C955581FCB5F88",
+  "network": "kovan",
+  "startBlock": 24389611,
+  "updaterAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C",
+  "updaterEvents": [
+    {
+      "event": "Withdrawal(indexed address,uint256)",
+      "handler": "handleWithdrawal"
+    },
+    {
+      "event": "Approval(indexed address,indexed address,uint256)",
+      "handler": "handleApproval"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "description": "Collect Spaceports contracts analytics.",
+  "factoryAddress": "0x67019Edf7E115d17086e1660b577CAdccc57dFf3",
+  "network": "mainnet",
+  "startBlock": 12587304,
+  "updaterAddress": "0xc00e94cb662c3520282e6f5717214004a7f26888",
+  "updaterEvents": [
+    {
+      "event": "Transfer(indexed address,indexed address,uint256)",
+      "handler": "handleTransfer"
+    }
+  ]
+}

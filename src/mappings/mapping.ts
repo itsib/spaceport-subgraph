@@ -3,7 +3,7 @@ import { Participant, Spaceport, Token, User } from '../types/schema';
 import {
   AddLiquidityCall,
   ForceFailByPlfiCall,
-  ForceFailIfPairExistsCall,
+  ForceFailIfPairExistsCall, spaceportAddLiquidity,
   UpdateBlocksCall,
   UserDepositCall,
   UserWithdrawBaseTokensCall,
@@ -63,8 +63,8 @@ export function handleUserDeposit(call: UserDepositCall): void {
   updateSpaceportStatus(spaceportId, call.block.timestamp);
 }
 
-export function handleAddLiquidity(call: AddLiquidityCall): void {
-  let spaceportId = call.to.toHexString()
+export function handleAddLiquidity(event: spaceportAddLiquidity): void {
+  let spaceportId = event.address.toHexString()
   let spaceport = Spaceport.load(spaceportId)
   if (spaceport === null) {
     warning('There is no spaceport with address {}', [spaceportId]);
@@ -72,9 +72,9 @@ export function handleAddLiquidity(call: AddLiquidityCall): void {
   }
 
   spaceport.lpGenerationComplete = true;
-  spaceport.lpGenerationCompleteTime = call.block.timestamp;
+  spaceport.lpGenerationCompleteTime = event.block.timestamp;
 
-  updateSpaceportStatus(spaceportId, call.block.timestamp);
+  updateSpaceportStatus(spaceportId, event.block.timestamp);
 }
 
 /**

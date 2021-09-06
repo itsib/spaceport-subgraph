@@ -1,19 +1,19 @@
 specVersion: 0.0.2
-description: Collect Spaceports contracts analytics
+description: {{description}}
 repository: https://github.com/itsib/spaceport-subgraph
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: SpaceportFactory
-    network: matic
+    network: {{network}}
     source:
-      address: '0x07aa1458ca946cbc8cad765918b7374a34759f2a'
+      address: "{{factoryAddress}}"
       abi: SpaceportFactory
-      startBlock: 15443977
+      startBlock: {{startBlock}}
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       file: ./src/mappings/factory.ts
       entities:
@@ -33,16 +33,43 @@ dataSources:
           file: ./abis/spaceport.json
       callHandlers:
         - function: registerSpaceport(address)
-          handler: handleRegisterSpaceport
+          handler: handleRegisterSpaceportCall
+
+  - kind: ethereum/contract
+    name: Updater
+    network: mainnet
+    source:
+      address: "{{updaterAddress}}"
+      abi: Updater
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings/update.ts
+      entities:
+        - Spaceport
+        - LatestUpdatedBlock
+        - UpdateTask
+      abis:
+        - name: Spaceport
+          file: ./abis/spaceport.json
+        - name: Updater
+          file: ./abis/updater.json
+      eventHandlers:
+        {{#each updaterEvents as | event |}}
+        - event: {{event.event}}
+          handler: {{event.handler}}
+        {{/each}}
 templates:
   - kind: ethereum/contract
     name: Spaceport
-    network: matic
+    network: mainnet
     source:
       abi: Spaceport
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.3
       language: wasm/assemblyscript
       file: ./src/mappings/mapping.ts
       entities:

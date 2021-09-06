@@ -1,13 +1,13 @@
 import { Address } from '@graphprotocol/graph-ts';
 import { Spaceport, SpaceportFactory } from '../types/schema';
 import { Spaceport as SpaceportContract } from '../types/SpaceportFactory/Spaceport'
-import { RegisterSpaceportCall } from '../types/SpaceportFactory/SpaceportFactory';
+import { spaceportRegistered } from '../types/SpaceportFactory/SpaceportFactory';
 import { Spaceport as SpaceportTemplate } from '../types/templates'
 import { ONE_BI, ZERO_BD, ZERO_BI } from './constants';
 import { addToUpdateQueue, getOrCreateToken } from './helpers';
 
-export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
-  let spaceportFactoryId = call.to.toHexString()
+export function handleRegisterSpaceport(event: spaceportRegistered): void {
+  let spaceportFactoryId = event.address.toHexString()
   let spaceportFactory = SpaceportFactory.load(spaceportFactoryId)
   if (spaceportFactory == null) {
     spaceportFactory = new SpaceportFactory(spaceportFactoryId);
@@ -15,12 +15,12 @@ export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
     spaceportFactory.save();
   }
 
-  let spaceportId = call.inputs._spaceportAddress.toHexString();
+  let spaceportId = event.params.spaceportContract.toHexString();
   let spaceport = Spaceport.load(spaceportId)
   if (spaceport == null) {
     spaceport = new Spaceport(spaceportId);
 
-    let spaceportContract = SpaceportContract.bind(call.inputs._spaceportAddress);
+    let spaceportContract = SpaceportContract.bind(event.params.spaceportContract);
     let spaceportInfo = spaceportContract.SPACEPORT_INFO();
     let status = spaceportContract.spaceportStatus();
 
@@ -44,8 +44,8 @@ export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
     spaceport.lpGenerationCompleteTime = ZERO_BI;
     spaceport.startBlock = spaceportInfo.value10;
     spaceport.endBlock = spaceportInfo.value11;
-    spaceport.createdAtTimestamp = call.block.timestamp;
-    spaceport.createdAtBlockNumber = call.block.number;
+    spaceport.createdAtTimestamp = event.block.timestamp;
+    spaceport.createdAtBlockNumber = event.block.number;
 
     spaceport.save();
 
@@ -56,6 +56,6 @@ export function handleRegisterSpaceport(call: RegisterSpaceportCall): void {
     spaceportFactory.save();
 
     // Create the tracked contract based on the template
-    SpaceportTemplate.create(call.inputs._spaceportAddress);
+    SpaceportTemplate.create(event.params.spaceportContract);
   }
 }
