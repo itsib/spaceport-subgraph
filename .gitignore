@@ -62,6 +62,7 @@ typings/
 
 .idea
 src/types/
+src/mappings/addresses.ts
 build/
 
 subgraph.yaml

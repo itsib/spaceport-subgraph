@@ -1,0 +1,15 @@
+export let DEX_ADDRESS: string[] = [
+{{#dex}}
+  '{{generator}}',
+{{/dex}}
+];
+export let DEX_NAME: string[] = [
+{{#dex}}
+  '{{name}}',
+{{/dex}}
+];
+export let DEPRECATED_INCLUDES_IDO: string[] = [
+{{#deprecated}}
+  '{{.}}',
+{{/deprecated}}
+];

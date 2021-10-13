@@ -1,11 +1,10 @@
 /**
- *Submitted for verification at Etherscan.io on 2021-05-07
+ *Submitted for verification at Etherscan.io on 2021-09-06
 */
 
 pragma solidity 0.6.12;
 
 
-// SPDX-License-Identifier: MIT
 /**
     helper methods for interacting with ERC20 tokens that do not consistently return true/false
     with the addition of a transfer function to send eth or an erc20 token
@@ -603,6 +602,9 @@ contract Spaceportv1 is ReentrancyGuard {
     event spaceportUserWithdrawBaseTokens(uint256 value);
     event spaceportOwnerWithdrawTokens();
     event spaceportAddLiquidity();
+    event spaceportForceFailIfPairExists();
+    event spaceportForceFailByPlfi();
+    event spaceportUpdateBlocks(uint256 start, uint256 end);
 
     /// @notice Spaceport Contract Version, used to choose the correct ABI to decode the contract
     uint256 public CONTRACT_VERSION = 1;
@@ -652,10 +654,8 @@ contract Spaceportv1 is ReentrancyGuard {
     struct BuyerInfo {
         uint256 baseDeposited; // total base token (usually ETH) deposited by user, can be withdrawn on presale failure
         uint256 tokensOwed; // num Spaceport tokens a user is owed, can be withdrawn on presale success
+        uint256 tokensClaimed;
         uint256 lastUpdate;
-        uint256 vestingTokens;
-        uint256 vestingTokensOwed;
-        bool vestingRunning;
     }
 
     SpaceportVesting public SPACEPORT_VESTING;
@@ -675,9 +675,9 @@ contract Spaceportv1 is ReentrancyGuard {
         SPACEPORT_GENERATOR = _spaceportGenerator;
         PLASMASWAP_FACTORY = IPlasmaswapFactory(0x7A6521ba7Ba45C908be726D719ACd547D4a8E246);
         WETH = IWETH(0xd0A1E359811322d97991E03f863a0C30C2cF029C);
-        SPACEPORT_SETTINGS = ISpaceportSettings(0x8293F5B2c127BA4473DB40FB6BcFcd298274F4eC);
-        SPACEPORT_LOCK_FORWARDER = ISpaceportLockForwarder(0x48f93a11d89EBd278e7C36EdfEE76d315EDD4cfF);
-        PLFI_DEV_ADDRESS = 0x6cd3B7115c61413d88cBcaA51A0816dFC10F25Ea;
+        SPACEPORT_SETTINGS = ISpaceportSettings(0x48A6003b0c8c21fAcCF753f3Dab4730472642777);
+        SPACEPORT_LOCK_FORWARDER = ISpaceportLockForwarder(0xB01271e3F3078871fD68465fCAFf8561Ff65a46e);
+        PLFI_DEV_ADDRESS = 0xda8fd0D6AF3868E4d11A8724ce918bA18f04D198;
     }
 
     function init1 (
@@ -741,9 +741,6 @@ contract Spaceportv1 is ReentrancyGuard {
         _;
     }
 
-    // block.number = 24827636  block.number +1 (24827636)
-    // START_BLOCK  = 24826825  block.number === START_BLOCK
-    // END_BLOCK    = 24827636  block.number < END_BLOCK
     function spaceportStatus () public view returns (uint256) {
         if (STATUS.FORCE_FAILED) {
             return 3; // FAILED - force fail
@@ -789,7 +786,7 @@ contract Spaceportv1 is ReentrancyGuard {
 
         buyer.baseDeposited = buyer.baseDeposited.add(amount_in);
         buyer.tokensOwed = buyer.tokensOwed.add(tokensSold);
-        buyer.vestingRunning = false;
+        buyer.lastUpdate = block.timestamp;
 
         STATUS.TOTAL_BASE_COLLECTED = STATUS.TOTAL_BASE_COLLECTED.add(amount_in);
         STATUS.TOTAL_TOKENS_SOLD = STATUS.TOTAL_TOKENS_SOLD.add(tokensSold);
@@ -812,36 +809,27 @@ contract Spaceportv1 is ReentrancyGuard {
         BuyerInfo storage buyer = BUYERS[msg.sender];
         require(STATUS.LP_GENERATION_COMPLETE_TIME + SPACEPORT_VESTING.vestingCliff < block.timestamp, "vesting cliff : not time yet");
 
-        uint256 tokensRemainingDenominator = STATUS.TOTAL_TOKENS_SOLD.sub(STATUS.TOTAL_TOKENS_WITHDRAWN);
-        require(tokensRemainingDenominator > 0, 'NOTHING TO WITHDRAW');
-
-        uint256 tokensOwed = SPACEPORT_INFO.S_TOKEN.balanceOf(address(this)).mul(buyer.tokensOwed).div(tokensRemainingDenominator);
-        require(tokensOwed > 0, 'OWED TOKENS NOT FOUND');
-
-        if(!buyer.vestingRunning)
-        {
-            buyer.vestingTokens = tokensOwed;
-            buyer.vestingTokensOwed = buyer.tokensOwed;
+        if (buyer.lastUpdate < STATUS.LP_GENERATION_COMPLETE_TIME ) {
             buyer.lastUpdate = STATUS.LP_GENERATION_COMPLETE_TIME;
-            buyer.vestingRunning = true;
         }
 
+        uint256 tokensOwed = 0;
         if(STATUS.LP_GENERATION_COMPLETE_TIME + SPACEPORT_VESTING.vestingEnd < block.timestamp) {
-            STATUS.TOTAL_TOKENS_WITHDRAWN = STATUS.TOTAL_TOKENS_WITHDRAWN.add(buyer.tokensOwed);
-            buyer.tokensOwed = 0;
+            tokensOwed = buyer.tokensOwed.sub(buyer.tokensClaimed);
         }
         else {
-            tokensOwed = buyer.vestingTokens.mul(block.timestamp - buyer.lastUpdate).div(SPACEPORT_VESTING.vestingEnd);
-            buyer.lastUpdate = block.timestamp;
-
-            uint256 diff = tokensOwed.div(buyer.vestingTokens);
-            STATUS.TOTAL_TOKENS_WITHDRAWN = STATUS.TOTAL_TOKENS_WITHDRAWN.add(buyer.vestingTokensOwed.mul(diff));
-
-            buyer.tokensOwed = buyer.tokensOwed.sub(buyer.vestingTokensOwed.mul(diff));
-            require(buyer.tokensOwed > 0, 'NOTHING TO CLAIM');
+            tokensOwed = buyer.tokensOwed.mul(block.timestamp - buyer.lastUpdate).div(SPACEPORT_VESTING.vestingEnd);
         }
 
+        buyer.lastUpdate = block.timestamp;
+        buyer.tokensClaimed = buyer.tokensClaimed.add(tokensOwed);
+
+        require(tokensOwed > 0, 'NOTHING TO CLAIM');
+        require(buyer.tokensClaimed <= buyer.tokensOwed, 'CLAIM TOKENS ERROR');
+
+        STATUS.TOTAL_TOKENS_WITHDRAWN = STATUS.TOTAL_TOKENS_WITHDRAWN.add(tokensOwed);
         TransferHelper.safeTransfer(address(SPACEPORT_INFO.S_TOKEN), msg.sender, tokensOwed);
+
         emit spaceportUserWithdrawTokens(tokensOwed);
     }
 
@@ -877,6 +865,7 @@ contract Spaceportv1 is ReentrancyGuard {
         require(!STATUS.LP_GENERATION_COMPLETE && !STATUS.FORCE_FAILED);
         if (SPACEPORT_LOCK_FORWARDER.plasmaswapPairIsInitialised(address(SPACEPORT_INFO.S_TOKEN), address(SPACEPORT_INFO.B_TOKEN))) {
             STATUS.FORCE_FAILED = true;
+            emit spaceportForceFailIfPairExists();
         }
     }
 
@@ -884,6 +873,7 @@ contract Spaceportv1 is ReentrancyGuard {
     function forceFailByPlfi () external {
         require(msg.sender == PLFI_DEV_ADDRESS);
         STATUS.FORCE_FAILED = true;
+        emit spaceportForceFailByPlfi();
     }
 
     // on spaceport success, this is the final step to end the spaceport, lock liquidity and enable withdrawls of the sale token.
@@ -946,6 +936,7 @@ contract Spaceportv1 is ReentrancyGuard {
         require(_endBlock.sub(_startBlock) <= SPACEPORT_SETTINGS.getMaxSpaceportLength());
         SPACEPORT_INFO.START_BLOCK = _startBlock;
         SPACEPORT_INFO.END_BLOCK = _endBlock;
+        emit spaceportUpdateBlocks(_startBlock, _endBlock);
     }
 
     // editable at any stage of the presale

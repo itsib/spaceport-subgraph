@@ -9,18 +9,28 @@ type Spaceport @entity {
   "Should be equal SpaceportFactory.spaceportsAtIndex"
   index: BigInt!
   owner: String!
+  dex: String!
   tokenPrice: BigInt!
   listingRate: BigInt!
   liquidityPercent: BigInt!
   spaceToken: Token!
   baseToken: Token!
   inEth: Boolean!
+  "The amount of spaceport tokens up for presale"
+  amount: BigDecimal!
   "0 = QUEUED; 1 = ACTIVE; 2 = SUCCESS; 3 = FAILED"
   status: BigInt!
   participants: [Participant!]! @derivedFrom(field: "spaceport")
   "Count of participants with a positive deposit"
   participantsCount: BigInt!
+  "Minimal count of base tokens to need collected"
+  softCap: BigDecimal!
+  "count of base tokens for the IDO finish"
+  hardCap: BigDecimal!
+  "Count of collected base tokes on spaceport"
   depositTotal: BigDecimal!
+  "Tokens freeze on liquidity pool, period in seconds"
+  lockPeriod: BigInt!
   lpGenerationComplete: Boolean!
   lpGenerationCompleteTime: BigInt!
   createdAtTimestamp: BigInt!

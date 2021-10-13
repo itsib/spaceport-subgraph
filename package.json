@@ -4,15 +4,20 @@
   "scripts": {
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
-    "create": "graph create spaceport/kovan --node http://localhost:4000/deploy/",
+    "create:mainnet": "graph create spaceport/mainnet --node https://sg.plasma.finance/deploy/",
+    "create:matic": "graph create spaceport/matic --node https://sg.plasma.finance/deploy/",
+    "create:bsc": "graph create spaceport/bsc --node https://sg.plasma.finance/deploy/",
+    "create:kovan": "graph create spaceport/kovan --node https://sg.plasma.finance/deploy/",
+
     "prepare:mainnet": "node tmpl/prepare.js mainnet",
     "prepare:matic": "node tmpl/prepare.js matic",
     "prepare:bsc": "node tmpl/prepare.js bsc",
     "prepare:kovan": "node tmpl/prepare.js kovan",
-    "deploy:mainnet": "npm run prepare:mainnet && graph deploy spaceport/mainnet --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/",
-    "deploy:matic": "npm run prepare:matic && graph deploy spaceport/matic --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/",
-    "deploy:bsc": "npm run prepare:bsc && graph deploy spaceport/bsc --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/",
-    "deploy:kovan": "npm run prepare:kovan && graph deploy spaceport/kovan --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/"
+
+    "deploy:mainnet": "npm run create:mainnet && npm run prepare:mainnet && graph deploy spaceport/mainnet --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/",
+    "deploy:matic": "npm run create:matic && npm run prepare:matic && graph deploy spaceport/matic --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/",
+    "deploy:bsc": "npm run create:bsc && npm run prepare:bsc && graph deploy spaceport/bsc --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/",
+    "deploy:kovan": "npm run create:kovan && npm run prepare:kovan && graph deploy spaceport/kovan --ipfs https://sg.plasma.finance/ipfs/ --node https://sg.plasma.finance/deploy/"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.16.0",

@@ -4,7 +4,8 @@ import { Spaceport as SpaceportContract } from '../types/SpaceportFactory/Spacep
 import { spaceportRegistered } from '../types/SpaceportFactory/SpaceportFactory';
 import { Spaceport as SpaceportTemplate } from '../types/templates'
 import { ONE_BI, ZERO_BD, ZERO_BI } from './constants';
-import { addToUpdateQueue, getOrCreateToken } from './helpers';
+import { DEPRECATED_INCLUDES_IDO, DEX_ADDRESS, DEX_NAME } from './addresses';
+import { addToUpdateQueue, convertTokenToDecimal, getOrCreateToken } from './helpers';
 
 export function handleRegisterSpaceport(event: spaceportRegistered): void {
   let spaceportFactoryId = event.address.toHexString()
@@ -22,7 +23,18 @@ export function handleRegisterSpaceport(event: spaceportRegistered): void {
 
     let spaceportContract = SpaceportContract.bind(event.params.spaceportContract);
     let spaceportInfo = spaceportContract.SPACEPORT_INFO();
+    let spaceportGenerator = spaceportContract.SPACEPORT_GENERATOR();
     let status = spaceportContract.spaceportStatus();
+
+    let dex: string;
+    let index = DEX_ADDRESS.indexOf(spaceportGenerator.toHexString());
+    if (index !== -1) {
+      dex = DEX_NAME[index];
+    } else if (DEPRECATED_INCLUDES_IDO.indexOf(spaceportId) !== -1) {
+      dex = DEX_NAME[0];
+    } else {
+      return;
+    }
 
     let spaceTokenAddress: Address = spaceportInfo.value1;
     let baseTokenAddress: Address = spaceportInfo.value2;
@@ -33,13 +45,18 @@ export function handleRegisterSpaceport(event: spaceportRegistered): void {
     spaceport.spaceToken = spaceToken.id;
     spaceport.baseToken = baseToken.id;
     spaceport.inEth = spaceportInfo.value13;
+    spaceport.amount = convertTokenToDecimal(spaceportInfo.value5, spaceToken.decimals);
     spaceport.status = status;
     spaceport.participantsCount = ZERO_BI;
+    spaceport.hardCap = convertTokenToDecimal(spaceportInfo.value6, baseToken.decimals);
+    spaceport.softCap = convertTokenToDecimal(spaceportInfo.value7, baseToken.decimals);
     spaceport.depositTotal = ZERO_BD;
     spaceport.owner = spaceportInfo.value0.toHex();
+    spaceport.dex = dex;
     spaceport.tokenPrice = spaceportInfo.value3;
     spaceport.listingRate = spaceportInfo.value9;
     spaceport.liquidityPercent = spaceportInfo.value8;
+    spaceport.lockPeriod = spaceportInfo.value12;
     spaceport.lpGenerationComplete = false;
     spaceport.lpGenerationCompleteTime = ZERO_BI;
     spaceport.startBlock = spaceportInfo.value10;

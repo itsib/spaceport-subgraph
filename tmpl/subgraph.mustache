@@ -31,13 +31,13 @@ dataSources:
           file: ./abis/spaceport-factory.json
         - name: Spaceport
           file: ./abis/spaceport.json
-      callHandlers:
-        - function: registerSpaceport(address)
-          handler: handleRegisterSpaceportCall
+      eventHandlers:
+        - event: spaceportRegistered(address)
+          handler: handleRegisterSpaceport
 
   - kind: ethereum/contract
     name: Updater
-    network: mainnet
+    network: {{network}}
     source:
       address: "{{updaterAddress}}"
       abi: Updater
@@ -64,7 +64,7 @@ dataSources:
 templates:
   - kind: ethereum/contract
     name: Spaceport
-    network: mainnet
+    network: {{network}}
     source:
       abi: Spaceport
     mapping:
@@ -90,16 +90,16 @@ templates:
           file: ./abis/spaceport-factory.json
         - name: Spaceport
           file: ./abis/spaceport.json
-      callHandlers:
-        - function: userDeposit(uint256)
+      eventHandlers:
+        - event: spaceportUserDeposit(uint256)
           handler: handleUserDeposit
-        - function: addLiquidity()
+        - event: spaceportAddLiquidity()
           handler: handleAddLiquidity
-        - function: userWithdrawBaseTokens()
+        - event: spaceportUserWithdrawBaseTokens(uint256)
           handler: handleUserWithdrawBaseTokens
-        - function: updateBlocks(uint256,uint256)
-          handler: handleUpdateBlocksCall
-        - function: forceFailIfPairExists()
-          handler: handleForceFailIfPairExistsCall
-        - function: forceFailByPlfi()
-          handler: handleForceFailByPlfiCall
+        - event: spaceportUpdateBlocks(uint256,uint256)
+          handler: handleUpdateBlocks
+        - event: spaceportForceFailIfPairExists()
+          handler: handleForceFailIfPairExists
+        - event: spaceportForceFailByPlfi()
+          handler: handleForceFailByPlfi

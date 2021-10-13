@@ -1,8 +1,19 @@
 {
   "description": "Collect Spaceports contracts analytics.",
-  "factoryAddress": "0x814Aea5660fA1a0b6E156b1Aa0C955581FCB5F88",
+  "factoryAddress": "0xd7184e07804e66de4d67b7b9604e9ff196838fcb",
+  "dex": [
+    {
+      "name": "plasma",
+      "generator": "0xce91bcb851e2358128b252e98543ee4b55c028a0"
+    },
+    {
+      "name": "uniswap",
+      "generator": "0x40bc65404c82a5b4405737a403a862f65835f8db"
+    }
+  ],
+  "deprecated": ["0xb4af75c29d2457496e31a08612e55108ab3a8e0f"],
   "network": "kovan",
-  "startBlock": 24389611,
+  "startBlock": 27032107,
   "updaterAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C",
   "updaterEvents": [
     {

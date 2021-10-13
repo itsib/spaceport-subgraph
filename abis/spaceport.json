@@ -19,7 +19,38 @@
   {
     "anonymous": false,
     "inputs": [],
+    "name": "spaceportForceFailByPlfi",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "spaceportForceFailIfPairExists",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
     "name": "spaceportOwnerWithdrawTokens",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "start",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "end",
+        "type": "uint256"
+      }
+    ],
+    "name": "spaceportUpdateBlocks",
     "type": "event"
   },
   {
@@ -83,23 +114,13 @@
       },
       {
         "internalType": "uint256",
+        "name": "tokensClaimed",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
         "name": "lastUpdate",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "vestingTokens",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "vestingTokensOwed",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "vestingRunning",
-        "type": "bool"
       }
     ],
     "stateMutability": "view",
