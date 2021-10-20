@@ -11,18 +11,28 @@
       "generator": "0x40bc65404c82a5b4405737a403a862f65835f8db"
     }
   ],
-  "deprecated": ["0xb4af75c29d2457496e31a08612e55108ab3a8e0f"],
+  "deprecated": ["0xa82976f1f27a02404269285ef3cca86b146a2bf6", "0xa08c285de8aff48a3880332bf230d9a8b0c07865"],
+  "historyNodeStartOf": 0,
+  "spaceportsInitialInfo": [],
+  "tokensInfo": [],
   "network": "kovan",
   "startBlock": 27032107,
-  "updaterAddress": "0xd0A1E359811322d97991E03f863a0C30C2cF029C",
-  "updaterEvents": [
-    {
-      "event": "Withdrawal(indexed address,uint256)",
-      "handler": "handleWithdrawal"
-    },
-    {
-      "event": "Approval(indexed address,indexed address,uint256)",
-      "handler": "handleApproval"
-    }
-  ]
+  "updater": {
+    "address": "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
+    "startBlock": 27793449,
+    "events": [
+      {
+        "event": "Withdrawal(indexed address,uint256)",
+        "handler": "handleWithdrawal"
+      },
+      {
+        "event": "Approval(indexed address,indexed address,uint256)",
+        "handler": "handleApproval"
+      },
+      {
+        "event": "Deposit(indexed address,uint256)",
+        "handler": "handleDeposit"
+      }
+    ]
+  }
 }

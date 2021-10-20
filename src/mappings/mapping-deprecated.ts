@@ -3,15 +3,12 @@ import { ONE_BI, STATUS_FAILED, STATUS_SUCCESS } from '../constants/constants';
 import { HISTORY_NODE_START_OF } from '../constants/variables';
 import { Spaceport } from '../types/schema';
 import {
-  Spaceport as SpaceportContract,
+  DeprecatedSpaceport as SpaceportContract,
   spaceportAddLiquidity,
-  spaceportForceFailByPlfi,
-  spaceportForceFailIfPairExists,
-  spaceportUpdateBlocks,
   spaceportUserDeposit,
   spaceportUserWithdrawBaseTokens,
   spaceportUserWithdrawTokens,
-} from '../types/templates/Spaceport/Spaceport';
+} from '../types/templates/DeprecatedSpaceport/DeprecatedSpaceport';
 import { addToUpdateQueue } from '../utils/add-to-update-queue';
 import { claimSpaceTokens } from '../utils/claim-space-tokens';
 import { createTimeframe } from '../utils/create-timeframe';
@@ -50,6 +47,33 @@ function updateSpaceportStatus(spaceport: Spaceport, block: EthereumBlock): void
   logger('The spaceport status has been changed {} => {}', [oldStatusName, newStatusName]);
 }
 
+/**
+ * Check and update start/end blocks
+ * @param spaceport
+ * @param block
+ */
+function updateSpaceportBlocks(spaceport: Spaceport, block: EthereumBlock): void {
+  if (HISTORY_NODE_START_OF.gt(block.number)) {
+    return;
+  }
+
+  let spaceportContract = SpaceportContract.bind(Address.fromString(spaceport.id));
+  let result = spaceportContract.try_SPACEPORT_INFO();
+  if (result.reverted) {
+    warning('Fetch SPACEPORT_INFO error for {}', [spaceport.id]);
+    return;
+  }
+
+  let startBlock = result.value.value10;
+  let endBlock = result.value.value11;
+
+  if (spaceport.startBlock != startBlock || spaceport.endBlock != endBlock) {
+    spaceport.startBlock = startBlock;
+    spaceport.endBlock = endBlock;
+    addToUpdateQueue(spaceport.id, [startBlock, endBlock.plus(ONE_BI)]);
+  }
+}
+
 export function handleUserDeposit(event: spaceportUserDeposit): void {
   let spaceportId = event.address.toHexString()
   let spaceport = Spaceport.load(spaceportId)
@@ -59,8 +83,8 @@ export function handleUserDeposit(event: spaceportUserDeposit): void {
   }
 
   updateParticipantDeposit(event.transaction.from.toHexString(), event.params.value, spaceport as Spaceport, event.block.timestamp);
-
   updateSpaceportStatus(spaceport as Spaceport, event.block);
+  updateSpaceportBlocks(spaceport as Spaceport, event.block);
 
   spaceport.save();
 
@@ -79,6 +103,7 @@ export function handleAddLiquidity(event: spaceportAddLiquidity): void {
   spaceport.lpGenerationCompleteTime = event.block.timestamp;
 
   updateSpaceportStatus(spaceport as Spaceport, event.block);
+  updateSpaceportBlocks(spaceport as Spaceport, event.block);
 
   spaceport.save();
 }
@@ -96,16 +121,14 @@ export function handleUserWithdrawBaseTokens(event: spaceportUserWithdrawBaseTok
   }
 
   withdrawBaseTokens(event.transaction.from.toHexString(), spaceport as Spaceport);
+  updateSpaceportStatus(spaceport as Spaceport, event.block);
+  updateSpaceportBlocks(spaceport as Spaceport, event.block);
 
   spaceport.save();
 
   createTimeframe(event.block.timestamp, spaceport as Spaceport);
 }
 
-/**
- * Claim space tokens
- * @param event
- */
 export function handleUserWithdrawTokens(event: spaceportUserWithdrawTokens): void {
   let spaceportId = event.address.toHexString()
   let spaceport = Spaceport.load(spaceportId)
@@ -115,47 +138,7 @@ export function handleUserWithdrawTokens(event: spaceportUserWithdrawTokens): vo
   }
 
   claimSpaceTokens(event.transaction.from.toHexString(), event.params.value, spaceport as Spaceport);
-
-  spaceport.save();
-}
-
-export function handleUpdateBlocks(event: spaceportUpdateBlocks): void {
-  let spaceportId = event.address.toHexString()
-  let spaceport = Spaceport.load(spaceportId)
-  if (spaceport === null) {
-    warning('There is no spaceport with address {}', [spaceportId]);
-    return;
-  }
-
-  spaceport.startBlock = event.params.start;
-  spaceport.endBlock = event.params.end;
-  spaceport.save();
-
-  addToUpdateQueue(spaceportId, [event.params.start, event.params.end.plus(ONE_BI)]);
-}
-
-export function handleForceFailIfPairExists(event: spaceportForceFailIfPairExists): void {
-  let spaceportId = event.address.toHexString()
-  let spaceport = Spaceport.load(spaceportId)
-  if (spaceport === null) {
-    warning('There is no spaceport with address {}', [spaceportId]);
-    return;
-  }
-
-  updateSpaceportStatus(spaceport as Spaceport, event.block);
-
-  spaceport.save();
-}
-
-export function handleForceFailByPlfi(event: spaceportForceFailByPlfi): void {
-  let spaceportId = event.address.toHexString()
-  let spaceport = Spaceport.load(spaceportId)
-  if (spaceport === null) {
-    warning('There is no spaceport with address {}', [spaceportId]);
-    return;
-  }
-
-  updateSpaceportStatus(spaceport as Spaceport, event.block);
+  updateSpaceportBlocks(spaceport as Spaceport, event.block);
 
   spaceport.save();
 }

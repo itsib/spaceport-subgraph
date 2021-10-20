@@ -1,0 +1,130 @@
+import { BigInt } from '@graphprotocol/graph-ts';
+
+declare namespace bigInt {
+  function fromString(s: string): BigInt
+}
+
+export let DEX_ADDRESS: string[] = [
+{{#dex}}
+  '{{generator}}',
+{{/dex}}
+];
+export let DEX_NAME: string[] = [
+{{#dex}}
+  '{{name}}',
+{{/dex}}
+];
+export let DEPRECATED_INCLUDES_IDO: string[] = [
+{{#each deprecated}}
+  '{{.}}',
+{{/each}}
+];
+export let HISTORY_NODE_START_OF: BigInt = BigInt.fromI32({{historyNodeStartOf}});
+
+/**
+ * Defining token parameters
+ */
+export let TOKENS_ADDRESSES: string[] = [
+{{#each tokensInfo}}
+  '{{address}}',
+{{/each}}
+];
+export let TOKENS_NAMES: string[] = [
+{{#each tokensInfo}}
+  '{{name}}',
+{{/each}}
+];
+export let TOKENS_SYMBOLS: string[] = [
+{{#each tokensInfo}}
+  '{{symbol}}',
+{{/each}}
+];
+export let TOKENS_DECIMALS: i32[] = [
+{{#each tokensInfo}}
+  {{decimals}},
+{{/each}}
+];
+
+/**
+* Defining spaceports initial state
+*/
+export let SPACEPORTS_INIT_ADDRESSES: string[] = [
+{{#each spaceportsInitialInfo}}
+  '{{address}}',
+{{/each}}
+];
+export let SPACEPORTS_INIT_GENERATOR_ADDRESS: string[] = [
+{{#each spaceportsInitialInfo}}
+  '{{generator}}',
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_OWNER: string[] = [
+{{#each spaceportsInitialInfo}}
+  '{{info.owner}}',
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_SPACE_TOKEN: string[] = [
+{{#each spaceportsInitialInfo}}
+  '{{info.spaceToken}}',
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_BASE_TOKEN: string[] = [
+{{#each spaceportsInitialInfo}}
+  '{{info.baseToken}}',
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_TOKEN_PRICE: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  bigInt.fromString('{{info.tokenPrice}}'),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_MAX_SPEND_PER_BUYER: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  bigInt.fromString('{{info.maxSpendPerBuyer}}'),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_AMOUNT: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  bigInt.fromString('{{info.amount}}'),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_HARDCAP: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  bigInt.fromString('{{info.hardCap}}'),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_SOFTCAP: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  bigInt.fromString('{{info.softCap}}'),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_LIQUIDITY_PERCENT: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  BigInt.fromI32({{info.liquidityPercent}} as i32),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_LISTING_RATE: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  bigInt.fromString('{{info.listingRate}}'),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_START_BLOCK: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  BigInt.fromI32({{info.startBlock}} as i32),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_END_BLOCK: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  BigInt.fromI32({{info.endBlock}} as i32),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_LOCK_PERIOD: BigInt[] = [
+{{#each spaceportsInitialInfo}}
+  BigInt.fromI32({{info.lockPeriod}} as i32),
+{{/each}}
+];
+export let SPACEPORTS_INIT_INFO_IN_ETH: boolean[] = [
+{{#each spaceportsInitialInfo}}
+  {{info.inEth}},
+{{/each}}
+];

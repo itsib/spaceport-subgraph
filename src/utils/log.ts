@@ -1,5 +1,5 @@
 import { log } from '@graphprotocol/graph-ts/index';
-import { LOG_ID } from './constants';
+import { LOG_ID } from '../constants/constants';
 
 /**
  * Write log message in graph console with the log ID

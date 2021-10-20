@@ -12,13 +12,53 @@
     }
   ],
   "deprecated": ["0xb44682d392e575a90350e647e1c067fff99c2c5e"],
-  "network": "bsc",
-  "startBlock": 11108645,
-  "updaterAddress": "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-  "updaterEvents": [
+  "historyNodeStartOf": 10931245,
+  "spaceportsInitialInfo": [
     {
-      "event": "Withdrawal(indexed address,uint256)",
-      "handler": "handleWithdrawal"
+      "address": "0xb44682d392e575a90350e647e1c067fff99c2c5e",
+      "generator": "0xaf759f7a6ac1bd6e07cf0e897b30cfdca75515ec",
+      "info": {
+        "owner": "0x167cc663210f9e0f5ab8a3e345e61724a63ef56a",
+        "spaceToken": "0x2406dce4da5ab125a18295f4fb9fd36a0f7879a2",
+        "baseToken": "0xe9e7cea3dedca5984780bafc599bd69add087d56",
+        "tokenPrice": "50000000000000000000",
+        "maxSpendPerBuyer": "500000000000000000000",
+        "amount": "3500000000000000000000000",
+        "hardCap": "70000000000000000000000",
+        "softCap": "50000000000000000000000",
+        "liquidityPercent": 1000,
+        "listingRate": "33333333333333333333",
+        "startBlock": 10506797,
+        "endBlock": 10535285,
+        "lockPeriod": "5270400",
+        "inEth": false
+      }
     }
-  ]
+  ],
+  "tokensInfo": [
+    {
+      "address": "0xe9e7cea3dedca5984780bafc599bd69add087d56",
+      "symbol": "BUSD",
+      "name": "BUSD Token",
+      "decimals": 18
+    },
+    {
+      "address": "0x2406dce4da5ab125a18295f4fb9fd36a0f7879a2",
+      "symbol": "CPD",
+      "name": "Coinspaid",
+      "decimals": 18
+    }
+  ],
+  "network": "bsc",
+  "startBlock": 10356990,
+  "updater": {
+    "address": "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c",
+    "startBlock": 10356990,
+    "events": [
+      {
+        "event": "Withdrawal(indexed address,uint256)",
+        "handler": "handleWithdrawal"
+      }
+    ]
+  }
 }

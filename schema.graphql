@@ -1,12 +1,13 @@
 type SpaceportFactory @entity {
   id: ID!
-  "Should be equal SpaceportFactory.spaceportsLength"
+  "Total spaceports count"
   spaceportsLength: BigInt!
 }
 
 type Spaceport @entity {
   id: ID!
-  "Should be equal SpaceportFactory.spaceportsAtIndex"
+  "Spaceport of the previous versions."
+  isDeprecated: Boolean!
   index: BigInt!
   owner: String!
   dex: String!
@@ -32,7 +33,7 @@ type Spaceport @entity {
   "Tokens freeze on liquidity pool, period in seconds"
   lockPeriod: BigInt!
   lpGenerationComplete: Boolean!
-  lpGenerationCompleteTime: BigInt!
+  lpGenerationCompleteTime: BigInt
   createdAtTimestamp: BigInt!
   createdAtBlockNumber: BigInt!
   finishedAtTimestamp: BigInt
@@ -50,6 +51,10 @@ type Participant @entity {
   participant: User!
   spaceport: Spaceport!
   spaceToken: Token!
+  "Quantity of Space Tokens owned by the user"
+  spaceTokensOwned: BigDecimal!
+  spaceTokensClaim: BigDecimal!
+  "Base Tokens invested in IDO"
   deposit: BigDecimal!
   timestamp: BigInt!
 }

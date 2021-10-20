@@ -5,7 +5,7 @@ const handlebars = require('handlebars');
 const network = process.argv[2] || 'undefined';
 const configFile = path.resolve(`${__dirname}/../config/${network}.json`);
 const subgraphTmplFile = path.resolve(`${__dirname}/subgraph.mustache`);
-const dexTmplFile = path.resolve(`${__dirname}/addresses.mustache`);
+const dexTmplFile = path.resolve(`${__dirname}/variables.mustache`);
 
 if (!fs.existsSync(configFile)) {
   console.error(`ERR: File config/${network}.json do not exist`);
@@ -26,5 +26,5 @@ const dexTmpl = fs.readFileSync(dexTmplFile, 'utf-8');
 const config = JSON.parse(fs.readFileSync(configFile, 'utf-8'));
 
 fs.writeFileSync(path.resolve(`${__dirname}/../subgraph.yaml`), handlebars.compile(subgraphTmpl)(config));
-fs.writeFileSync(path.resolve(`${__dirname}/../src/mappings/addresses.ts`), handlebars.compile(dexTmpl)(config));
+fs.writeFileSync(path.resolve(`${__dirname}/../src/constants/variables.ts`), handlebars.compile(dexTmpl)(config));
 

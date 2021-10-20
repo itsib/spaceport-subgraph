@@ -29,8 +29,8 @@ dataSources:
           file: ./abis/ERC20NameBytes.json
         - name: SpaceportFactory
           file: ./abis/spaceport-factory.json
-        - name: Spaceport
-          file: ./abis/spaceport.json
+        - name: SpaceportInfo
+          file: ./abis/spaceport-info.json
       eventHandlers:
         - event: spaceportRegistered(address)
           handler: handleRegisterSpaceport
@@ -39,28 +39,29 @@ dataSources:
     name: Updater
     network: {{network}}
     source:
-      address: "{{updaterAddress}}"
+      address: "{{updater.address}}"
       abi: Updater
-      startBlock: {{startBlock}}
+      startBlock: {{updater.startBlock}}
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.3
       language: wasm/assemblyscript
-      file: ./src/mappings/update.ts
+      file: ./src/mappings/updater.ts
       entities:
         - Spaceport
         - LatestUpdatedBlock
         - UpdateTask
       abis:
-        - name: Spaceport
-          file: ./abis/spaceport.json
+        - name: SpaceportInfo
+          file: ./abis/spaceport-info.json
         - name: Updater
           file: ./abis/updater.json
       eventHandlers:
-        {{#each updaterEvents as | event |}}
+        {{#each updater.events as | event |}}
         - event: {{event.event}}
           handler: {{event.handler}}
         {{/each}}
+
 templates:
   - kind: ethereum/contract
     name: Spaceport
@@ -103,3 +104,41 @@ templates:
           handler: handleForceFailIfPairExists
         - event: spaceportForceFailByPlfi()
           handler: handleForceFailByPlfi
+
+  - kind: ethereum/contract
+    name: DeprecatedSpaceport
+    network: {{network}}
+    source:
+      abi: DeprecatedSpaceport
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings/mapping-deprecated.ts
+      entities:
+        - Spaceport
+        - Participant
+        - User
+        - Participant
+        - Token
+        - SpaceportStat
+      abis:
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: ERC20SymbolBytes
+          file: ./abis/ERC20SymbolBytes.json
+        - name: ERC20NameBytes
+          file: ./abis/ERC20NameBytes.json
+        - name: SpaceportFactory
+          file: ./abis/spaceport-factory.json
+        - name: DeprecatedSpaceport
+          file: ./abis/deprecated-spaceport.json
+      eventHandlers:
+        - event: spaceportAddLiquidity()
+          handler: handleAddLiquidity
+        - event: spaceportUserDeposit(uint256)
+          handler: handleUserDeposit
+        - event: spaceportUserWithdrawBaseTokens(uint256)
+          handler: handleUserWithdrawBaseTokens
+        - event: spaceportUserWithdrawTokens(uint256)
+          handler: handleUserWithdrawTokens

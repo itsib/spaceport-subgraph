@@ -12,13 +12,19 @@
     }
   ],
   "deprecated": ["0xf44f053e7ca45b93389237aced99f0719a5a4880"],
+  "historyNodeStartOf": 0,
+  "spaceportsInitialInfo": [],
+  "tokensInfo": [],
   "network": "mainnet",
-  "startBlock": 12587304,
-  "updaterAddress": "0xc00e94cb662c3520282e6f5717214004a7f26888",
-  "updaterEvents": [
-    {
-      "event": "Transfer(indexed address,indexed address,uint256)",
-      "handler": "handleTransfer"
-    }
-  ]
+  "startBlock": 13060390,
+  "updater": {
+    "address": "0xc00e94cb662c3520282e6f5717214004a7f26888",
+    "startBlock": 13060390,
+    "events": [
+      {
+        "event": "Transfer(indexed address,indexed address,uint256)",
+        "handler": "handleTransfer"
+      }
+    ]
+  }
 }
